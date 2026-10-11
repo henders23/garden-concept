@@ -1,0 +1,34 @@
+# House style for concept proposals
+
+How this designer presents a concept, taken from his own proposals. Follow it so the work looks like his.
+
+## What a concept proposal contains
+1. Cover: company, "Concept Design (v1) - <client surname>", prepared by, date, reference (e.g. GI/331).
+2. **New Garden Layout Proposal** page:
+   - **Context**: who commissioned it and what the garden is like now (areas, current surfaces, problems), beside 3-4 site photos.
+   - **Brief**: short bullet points of what the client asked for.
+3. Coloured concept plan + two aerial 3D views.
+4. Elevations (e.g. West / South / East), house and garden in profile against a pale blue sky.
+5. Eye-level and aerial views of the key spaces, with a few people for scale.
+6. A larger labelled plan of the main area.
+7. **Next Steps**: design process, planting plans come later, cost estimates are estimates, optional lighting, and a client approval signature line.
+
+## Level of detail (deliberately loose)
+- Zones are named, not specified: PLANTING, PAVING, LAWN, GRAVEL COURTYARD, HEDGE / TRELLIS, COMPOSTING AREA.
+- Materials appear as codes or broad names: RBG1 (resin bound gravel), HOGGIN / CRAG / CEDAPATH, PAVING.
+- Planting is shown as massed shrubs and trees with no species. Planting plans are a later, paid stage.
+- Structures are named by purpose: CARPORT, GARAGE, GREENHOUSE, FIREBOWL, SLATTED SCREEN & HEDGE PLANTERS, EXTENDED ROOF.
+- No dimensions, levels or prices on concept drawings.
+
+## Plan look
+- Muted sage background around the site, crisp black outlines.
+- Lawn mid-green with loose hand-drawn grass strokes; planting beds dark brown with rounded shrub masses; pale paving; warm brown gravel and hoggin; blue water.
+- Roofs shown from above in greys.
+- Labels: bold black capitals on the plan; grey rounded callout boxes with pointers for structures and features.
+
+## Image look
+- SketchUp-style massing with simple trees for 3D views; atmospheric, loose watercolour-style renders for client-facing views.
+- Soft English daylight, sage and green palette, white or off-white timber structures, simple people and cars for scale.
+
+## Tone of writing
+Plain, warm and professional. Short sentences. Talk about how the client will use and enjoy the spaces, and the problems the design solves (drainage, wind, privacy, access). Avoid jargon and over-promising.

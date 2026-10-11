@@ -1,0 +1,1513 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Garden Concept Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: a working bench - paste on the left, the drawing large on the right, downloads under the drawing. */
+:root {
+  --bg: #eef0e8;        /* pale sage paper */
+  --panel: #fbfbf7;
+  --ink: #23291f;
+  --muted: #5d6556;
+  --line: #d3d8c8;
+  --accent: #4f6a2e;    /* garden green */
+  --accent-ink: #ffffff;
+  --ok: #3f7a3a; --warn: #9a6b12; --bad: #a33a2a;
+  --display: "Josefin Sans", "Gill Sans", "Trebuchet MS", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #181b16; --panel: #21251e; --ink: #e6e9de; --muted: #a3ab98; --line: #353b30;
+  --accent: #a3c06a; --accent-ink: #18200f; --ok: #8cc47f; --warn: #e2b55a; --bad: #ef8a76; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #181b16; --panel: #21251e; --ink: #e6e9de; --muted: #a3ab98; --line: #353b30;
+  --accent: #a3c06a; --accent-ink: #18200f; --ok: #8cc47f; --warn: #e2b55a; --bad: #ef8a76; color-scheme: dark; }
+
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body); }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 20px 48px; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; padding-bottom: 14px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+h1 { font: 700 1.35rem/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; margin: 0; text-wrap: balance; }
+.tagline { color: var(--muted); margin: 0; max-width: 60ch; }
+.grid { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.step { font: 600 0.78rem/1 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+h2 { font: 600 1.05rem/1.3 var(--body); margin: 0 0 10px; }
+textarea { width: 100%; min-height: 260px; resize: vertical; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); color: var(--ink); font: 12.5px/1.45 var(--mono); }
+textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+button { font: 600 0.95rem/1 var(--body); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+.status { margin-top: 14px; border-radius: 8px; padding: 10px 12px; border: 1px solid var(--line); font-size: 0.95rem; }
+.status-title { margin: 0; font-weight: 600; }
+.status ul { margin: 6px 0 0; padding-left: 18px; }
+.status.ok { border-color: color-mix(in srgb, var(--ok) 50%, var(--line)); }
+.status.ok .status-title { color: var(--ok); }
+.status.warn { border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); }
+.status.warn .status-title { color: var(--warn); }
+.status.bad { border-color: color-mix(in srgb, var(--bad) 55%, var(--line)); }
+.status.bad .status-title { color: var(--bad); }
+.status.idle .status-title { color: var(--muted); font-weight: 400; }
+.how { margin-top: 16px; color: var(--muted); font-size: 0.92rem; }
+.how ol { padding-left: 18px; margin: 6px 0 0; display: grid; gap: 4px; }
+.drawing-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.proj-name { font: 700 1.1rem/1.2 var(--display); letter-spacing: 0.08em; text-transform: uppercase; margin: 0; }
+.proj-meta { color: var(--muted); margin: 2px 0 0; font-size: 0.9rem; }
+.tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.tabs button { border: 0; border-radius: 0; padding: 8px 14px; background: transparent; }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.canvas-host { overflow: auto; border-radius: 8px; border: 1px solid var(--line); background: #b9c1a2; max-width: 100%; }
+#plan { display: block; margin: 0 auto; max-width: none; }
+#three { border-radius: 8px; overflow: hidden; border: 1px solid var(--line); min-height: 300px; }
+#three canvas { display: block; width: 100%; }
+.view-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+.view-row .label { color: var(--muted); font-size: 0.9rem; margin-right: 4px; }
+.view-row button { padding: 7px 11px; font-size: 0.88rem; }
+.downloads { margin-top: 18px; display: grid; gap: 10px; }
+.dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.dl-grid button { text-align: left; padding: 12px 14px; display: grid; gap: 4px; line-height: 1.25; }
+.dl-grid button small { font-weight: 400; color: var(--muted); font-size: 0.82rem; }
+.dl-grid button.primary small { color: var(--accent-ink); opacity: 0.85; }
+.muted { color: var(--muted); }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+@media (prefers-reduced-motion: no-preference) { button { transition: border-color .15s, background-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Garden Concept Converter</h1>
+    <p class="tagline">Paste the layout from the Garden Concept Gem, check the drawing, and download files to open in SketchUp.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="in-h">
+      <p class="step">Step 1</p>
+      <h2 id="in-h">Paste the layout</h2>
+      <label for="layout" class="muted" style="display:block;font-size:.9rem;margin-bottom:6px">In the Gem, press the copy button on the layout block, then paste it here.</label>
+      <textarea id="layout" spellcheck="false" autocomplete="off"></textarea>
+      <div class="row">
+        <button id="draw" class="primary" type="button">Draw it</button>
+        <button id="paste" type="button">Paste</button>
+        <button id="example" type="button">Load example</button>
+        <button id="clear" type="button">Clear</button>
+      </div>
+      <div id="status" class="status idle" role="status" aria-live="polite"><p class="status-title">Paste the layout block from the Gem, or load the example.</p></div>
+      <div class="how">
+        <strong>Which file for SketchUp?</strong>
+        <ol>
+          <li><b>SketchUp on a computer:</b> File › Import the <b>3D model</b> (.dae). Paving, lawn and beds arrive as coloured surfaces; walls, planters and pergola as simple shapes.</li>
+          <li><b>Free SketchUp in a browser:</b> import the <b>plan image</b>. Click once to place it, then type the width printed on the image (for example <code>23.2m</code>) so it's to scale, and model over it.</li>
+          <li>The <b>DXF</b> is a 2D base plan for any CAD program (choose Meters when importing).</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="proj-h">
+      <div class="drawing-head">
+        <div>
+          <p class="step">Step 2 · Check the drawing</p>
+          <p class="proj-name" id="project-name">Example layout</p>
+          <p class="proj-meta" id="project-meta"></p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Drawing view">
+          <button type="button" role="tab" data-tab="plan" aria-selected="true">Plan</button>
+          <button type="button" role="tab" data-tab="3d" aria-selected="false">3D view</button>
+        </div>
+      </div>
+      <div id="panel-plan"><div class="canvas-host"><canvas id="plan" aria-label="Coloured concept plan"></canvas></div></div>
+      <div id="panel-3d" hidden>
+        <div id="three" aria-label="3D view - drag to turn, scroll to zoom"></div>
+        <div class="view-row">
+          <span class="label">Views:</span>
+          <button type="button" data-view="front">From the house end</button>
+          <button type="button" data-view="rear">From the far end</button>
+          <button type="button" data-view="top">Top</button>
+          <button type="button" data-dl="view">Save this view (.png)</button>
+        </div>
+        <p class="muted" style="font-size:.88rem;margin:8px 0 0">Drag to turn, scroll or pinch to zoom. Save a view and drop it into the Gem to get a loose concept render of it.</p>
+      </div>
+
+      <div class="downloads">
+        <p class="step" style="margin:0">Step 3 · Download for SketchUp</p>
+        <div class="dl-grid">
+          <button type="button" class="primary" data-dl="zip">All three files<small>One .zip: 3D model, base plan and plan image</small></button>
+          <button type="button" data-dl="dae">3D model (.dae)<small>SketchUp on a computer</small></button>
+          <button type="button" data-dl="png">Plan image (.png)<small>Any SketchUp, incl. free web version</small></button>
+          <button type="button" data-dl="dxf">Base plan (.dxf)<small>2D lines on layers, in metres</small></button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<div id="toast" role="status" hidden></div>
+
+<script type="application/json" id="example-layout">
+{
+  "project": {"name": "Example - Orchard House", "client": "Example client", "ref": "EX/001", "north": 0},
+  "site": {"boundary": [[0, -9], [18, -9], [18, 25], [0, 25]], "ground": "lawn"},
+  "zones": [
+    {"type": "planting", "shape": {"rect": [0, -9, 0.9, 9]}, "label": ""},
+    {"type": "planting", "shape": {"blob": [2.4, -5.2, 2.0, 3.2]}, "label": "PLANTING"},
+    {"type": "resin_bound", "shape": {"points": [[18, -9], [18, 0], [11.5, 0], [11.5, -2.5], [9.6, -2.8], [7.9, -3.8], [6.4, -5.2], [5.4, -7], [5, -9]]}, "label": "RBG1"},
+    {"type": "sandstone", "shape": {"arc": [6.5, 0, 0, 3.0, 180, 360]}, "label": "ENTRANCE\nTERRACE", "label_at": [6.5, -1.6]},
+    {"type": "resin_bound", "shape": {"rect": [11.5, -2.0, 4.0, 3.0]}, "label": ""},
+    {"type": "paving", "shape": {"points": [[0.9, 6.5], [5.5, 6.5], [5.5, 10.8], [11.0, 10.8], [11.0, 13.4], [0.9, 13.4]]}, "label": "PAVING", "label_at": [3.2, 9.6]},
+    {"type": "raised_bed", "shape": {"rect": [0.9, 6.6, 0.9, 3.0]}, "label": ""},
+    {"type": "raised_bed", "shape": {"rect": [7.2, 11.4, 2.8, 0.8]}, "label": ""},
+    {"type": "gravel", "shape": {"circle": [6.5, 17.4, 3.45]}, "label": "GRAVEL\nCOURTYARD", "label_at": [6.5, 18.9]},
+    {"type": "gravel", "shape": {"rect": [4.4, 13.4, 4.2, 1.6]}, "label": ""},
+    {"type": "planting", "shape": {"arc": [6.5, 17.4, 1.6, 3.0, 200, 250]}, "label": ""},
+    {"type": "planting", "shape": {"arc": [6.5, 17.4, 1.6, 3.0, 290, 340]}, "label": ""},
+    {"type": "hoggin", "shape": {"rect": [11.4, 9.0, 6.6, 13.5]}, "label": "HOGGIN", "label_at": [13.2, 21.6]},
+    {"type": "veg_bed", "shape": {"rect": [12.2, 11.0, 2.2, 1.6]}, "label": ""},
+    {"type": "veg_bed", "shape": {"rect": [15.2, 11.0, 2.2, 1.6]}, "label": ""},
+    {"type": "veg_bed", "shape": {"rect": [12.2, 13.8, 2.2, 1.6]}, "label": ""},
+    {"type": "veg_bed", "shape": {"rect": [15.2, 13.8, 2.2, 1.6]}, "label": ""},
+    {"type": "planting", "shape": {"rect": [0, 9.0, 0.9, 16]}, "label": ""},
+    {"type": "planting", "shape": {"rect": [0.9, 23.6, 10.5, 1.4]}, "label": ""},
+    {"type": "planting", "shape": {"blob": [2.6, 20.2, 1.9, 2.4]}, "label": "PLANTING"}
+  ],
+  "lines": [
+    {"type": "fence", "points": [[0, -9], [0, 25], [18, 25], [18, -9]]},
+    {"type": "screen", "points": [[11.06, 11.0], [11.06, 17.6]], "label": "SLATTED SCREEN"}
+  ],
+  "buildings": [
+    {"type": "house", "shape": {"rect": [3, 0, 8, 8]}, "storeys": 2, "roof": "hip"},
+    {"type": "extension", "shape": {"rect": [5.5, 8, 5.5, 2.8]}, "storeys": 1, "roof": "flat", "label": "EXTENDED\nKITCHEN"},
+    {"type": "outbuilding", "shape": {"rect": [1, 1.5, 2, 5]}, "storeys": 1, "roof": "flat"},
+    {"type": "garage", "shape": {"rect": [11.5, 1.0, 4.0, 6.0]}, "storeys": 1, "roof": "flat", "label": "GARAGE"}
+  ],
+  "structures": [
+    {"type": "carport", "shape": {"rect": [11.5, -2.0, 4.0, 3.0]}, "label": "CARPORT"},
+    {"type": "pergola", "shape": {"arc": [6.5, 17.4, 2.95, 4.05, -15, 195]}, "label": ""},
+    {"type": "greenhouse", "shape": {"rect": [12.4, 17.0, 4.2, 3.0]}, "label": "GREENHOUSE"}
+  ],
+  "planting": [
+    {"type": "tree", "at": [2.3, -5.6], "size": "medium", "form": "airy"},
+    {"type": "tree", "at": [5.0, -5.4], "size": "small", "form": "airy"},
+    {"type": "tree", "at": [2.6, 20.4], "size": "small", "form": "multistem"},
+    {"type": "tree", "at": [1.2, 15.0], "size": "medium"},
+    {"type": "tree", "at": [10.0, 24.0], "size": "large"},
+    {"type": "tree", "at": [6.0, 24.2], "size": "small", "form": "airy"},
+    {"type": "tree", "at": [17.2, 24.0], "size": "medium"}
+  ],
+  "features": [
+    {"type": "firebowl", "at": [6.5, 17.4], "label": "FIREBOWL", "label_at": [10.6, 15.6]},
+    {"type": "dining_table", "at": [3.3, 11.4]},
+    {"type": "car", "at": [15.4, -6.2], "rotate": 90},
+    {"type": "person", "at": [5.6, 16.6]},
+    {"type": "person", "at": [6.0, 16.2]}
+  ],
+  "labels": [
+    {"text": "CURVED PERGOLA", "at": [4.0, 22.6], "pointer": [4.2, 20.4]},
+    {"text": "SLATTED SCREEN", "at": [14.8, 9.9], "pointer": [11.1, 12.8]},
+    {"text": "HEDGE PLANTERS", "at": [8.6, 13.0], "style": "box"},
+    {"text": "RAISED VEG BEDS", "at": [14.7, 15.95]}
+  ]
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script id="gc-core">
+/* Garden Concept Converter - core (no DOM). Layout text -> model -> 3D objects -> DAE / DXF. */
+(function (root) {
+  "use strict";
+  const GC = {};
+
+  // ------------------------------------------------------------------ palette (his concept style)
+  const C = {
+    sage: "#b9c1a2", lawn: "#7f9b45", planting: "#5b4a3d", paving: "#f2f1ec", sandstone: "#dccaa3",
+    resin: "#dddcd6", gravel: "#a39380", hoggin: "#8a7563", decking: "#b98b5c", water: "#7fb2d4",
+    pool: "#6fb0d8", raised: "#9a5a32", veg: "#4f6b34", bark: "#7d5d43", meadow: "#a7b46a",
+    wall: "#c9c4bb", house: "#c9d3dc", roof: "#8e99a6", roofFlat: "#b7c2cc", timber: "#7a4e2f",
+    white: "#f4f4f2", glass: "#dfe9ef", fence: "#9c825f", hedge: "#4f6e3a", soil: "#5b4a3d",
+    steel: "#3a3a3a", fire: "#c26a35", stone: "#b6b1a8", car: "#2f6db3", person: "#e2c27a", trunk: "#5a4634",
+  };
+  GC.colours = C;
+
+  const ZONES = {
+    lawn: { colour: C.lawn, label: "LAWN" },
+    planting: { colour: C.planting, label: "PLANTING" },
+    paving: { colour: C.paving, label: "PAVING" },
+    sandstone: { colour: C.sandstone, label: "PAVING" },
+    resin_bound: { colour: C.resin, label: "RESIN BOUND GRAVEL" },
+    gravel: { colour: C.gravel, label: "GRAVEL" },
+    hoggin: { colour: C.hoggin, label: "HOGGIN" },
+    decking: { colour: C.decking, label: "DECKING" },
+    water: { colour: C.water, label: "POND" },
+    pool: { colour: C.pool, label: "POOL" },
+    raised_bed: { colour: C.raised, label: "RAISED BED", height: 0.45, top: C.soil },
+    veg_bed: { colour: C.timber, label: "VEG BED", height: 0.3, top: C.veg },
+    bark: { colour: C.bark, label: "PLAY AREA" },
+    meadow: { colour: C.meadow, label: "MEADOW" },
+  };
+  const ZONE_ALIASES = { patio: "paving", terrace: "paving", path: "paving", stone: "sandstone", resin: "resin_bound",
+    rbg: "resin_bound", driveway: "resin_bound", drive: "resin_bound", deck: "decking", pond: "water",
+    swimming_pool: "pool", beds: "planting", border: "planting", bed: "planting", grass: "lawn", wildflower: "meadow",
+    raised: "raised_bed", veg: "veg_bed", vegetable_bed: "veg_bed", play: "bark", chippings: "bark" };
+  const LINES = {
+    wall: { t: 0.215, h: 1.0, colour: C.wall },
+    retaining_wall: { t: 0.3, h: 0.6, colour: C.wall },
+    fence: { t: 0.05, h: 1.8, colour: C.fence },
+    screen: { t: 0.08, h: 1.8, colour: C.timber },
+    hedge: { t: 0.7, h: 1.5, colour: C.hedge },
+    trellis: { t: 0.05, h: 1.8, colour: C.white },
+    edging: { t: 0.06, h: 0.06, colour: C.steel },
+    stepping_stones: { t: 0.5, h: 0.04, colour: C.stone },
+  };
+  const STRUCTURES = ["pergola", "carport", "shed", "summerhouse", "greenhouse", "garden_room", "gazebo"];
+  const BUILDINGS = ["house", "garage", "extension", "outbuilding"];
+  const FEATURES = {
+    firebowl: 0.9, dining_table: 2.0, bench: 1.8, pot: 0.6, water_feature: 0.9, sculpture: 0.5, boulder: 1.0,
+    car: 4.4, person: 0.5, lounger: 2.0, hot_tub: 2.2, bin_store: 2.0,
+  };
+  const TREE_SIZES = { small: { h: 4.5, r: 1.4 }, medium: { h: 6.5, r: 2.0 }, large: { h: 9.0, r: 3.0 } };
+  GC.ZONES = ZONES; GC.LINES = LINES; GC.STRUCTURES = STRUCTURES; GC.FEATURES = FEATURES;
+
+  // ------------------------------------------------------------------ small maths
+  const rad = (d) => (d * Math.PI) / 180;
+  function mulberry(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function hashStr(s) { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function area(p) { let a = 0; for (let i = 0; i < p.length; i++) { const [x1, y1] = p[i], [x2, y2] = p[(i + 1) % p.length]; a += x1 * y2 - x2 * y1; } return a / 2; }
+  function ccw(p) { return area(p) < 0 ? p.slice().reverse() : p; }
+  function centroid(p) {
+    const A = area(p);
+    if (Math.abs(A) < 1e-9) return [p.reduce((s, q) => s + q[0], 0) / p.length, p.reduce((s, q) => s + q[1], 0) / p.length];
+    let cx = 0, cy = 0;
+    for (let i = 0; i < p.length; i++) { const [x1, y1] = p[i], [x2, y2] = p[(i + 1) % p.length]; const f = x1 * y2 - x2 * y1; cx += (x1 + x2) * f; cy += (y1 + y2) * f; }
+    return [cx / (6 * A), cy / (6 * A)];
+  }
+  function inPoly(pt, poly) {
+    let inside = false; const [x, y] = pt;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [xi, yi] = poly[i], [xj, yj] = poly[j];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  function segDist(p, a, b) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy;
+    let t = L ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L : 0; t = Math.max(0, Math.min(1, t));
+    return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+  }
+  function edgeDist(p, poly) { let d = Infinity; for (let i = 0; i < poly.length; i++) d = Math.min(d, segDist(p, poly[i], poly[(i + 1) % poly.length])); return d; }
+  function labelPoint(p) {
+    const c = centroid(p);
+    if (inPoly(c, p)) return c;
+    let best = c, bd = -1; const xs = p.map((q) => q[0]), ys = p.map((q) => q[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    for (let i = 1; i < 16; i++) for (let j = 1; j < 16; j++) {
+      const q = [x0 + ((x1 - x0) * i) / 16, y0 + ((y1 - y0) * j) / 16];
+      if (inPoly(q, p)) { const d = edgeDist(q, p); if (d > bd) { bd = d; best = q; } }
+    }
+    return best;
+  }
+  function cleanPoly(p) {
+    const out = [];
+    for (const q of p) { const l = out[out.length - 1]; if (!l || Math.hypot(q[0] - l[0], q[1] - l[1]) > 1e-6) out.push(q); }
+    if (out.length > 2 && Math.hypot(out[0][0] - out[out.length - 1][0], out[0][1] - out[out.length - 1][1]) < 1e-6) out.pop();
+    return out;
+  }
+  function triangulate(poly) {
+    const p = poly, idx = p.map((_, i) => i), tris = [];
+    const cr = (a, b, c) => (p[b][0] - p[a][0]) * (p[c][1] - p[b][1]) - (p[b][1] - p[a][1]) * (p[c][0] - p[b][0]);
+    const inTri = (q, a, b, c) => {
+      const s = (u, v, w) => (p[v][0] - p[u][0]) * (q[1] - p[u][1]) - (p[v][1] - p[u][1]) * (q[0] - p[u][0]);
+      const d1 = s(a, b), d2 = s(b, c), d3 = s(c, a);
+      return d1 >= -1e-12 && d2 >= -1e-12 && d3 >= -1e-12;
+    };
+    let guard = 0;
+    while (idx.length > 3 && guard++ < 20000) {
+      let found = false;
+      for (let i = 0; i < idx.length; i++) {
+        const a = idx[(i + idx.length - 1) % idx.length], b = idx[i], c = idx[(i + 1) % idx.length];
+        if (cr(a, b, c) <= 1e-12) continue;
+        let blocked = false;
+        for (const j of idx) { if (j === a || j === b || j === c) continue; if (inTri(p[j], a, b, c)) { blocked = true; break; } }
+        if (blocked) continue;
+        tris.push([a, b, c]); idx.splice(i, 1); found = true; break;
+      }
+      if (!found) { for (let i = 1; i < idx.length - 1; i++) tris.push([idx[0], idx[i], idx[i + 1]]); return tris; }
+    }
+    if (idx.length === 3) tris.push([idx[0], idx[1], idx[2]]);
+    return tris;
+  }
+  function offsetLine(pts, d) {
+    const n = pts.length, out = [];
+    for (let i = 0; i < n; i++) {
+      const prev = pts[Math.max(0, i - 1)], next = pts[Math.min(n - 1, i + 1)];
+      let nx = 0, ny = 0;
+      const add = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1; nx += -dy / L; ny += dx / L; };
+      if (i > 0) add(prev, pts[i]);
+      if (i < n - 1) add(pts[i], next);
+      const L = Math.hypot(nx, ny) || 1; nx /= L; ny /= L;
+      let k = 1;
+      if (i > 0 && i < n - 1) {
+        const dx = next[0] - pts[i][0], dy = next[1] - pts[i][1], Ls = Math.hypot(dx, dy) || 1;
+        const cos = nx * (-dy / Ls) + ny * (dx / Ls); k = 1 / Math.max(0.35, cos);
+      }
+      out.push([pts[i][0] + nx * d * k, pts[i][1] + ny * d * k]);
+    }
+    return out;
+  }
+  function smooth(pts, per = 8) {
+    // Catmull-Rom curve through the given points
+    if (pts.length < 3) return pts;
+    const out = [], P = (i) => pts[Math.max(0, Math.min(pts.length - 1, i))];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+      for (let k = 0; k < per; k++) {
+        const t = k / per, t2 = t * t, t3 = t2 * t;
+        out.push([0, 1].map((j) => 0.5 * (2 * p1[j] + (-p0[j] + p2[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2 + (-p0[j] + 3 * p1[j] - 3 * p2[j] + p3[j]) * t3)));
+      }
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
+  }
+  function band(pts, w) { return offsetLine(pts, w / 2).concat(offsetLine(pts, -w / 2).reverse()); }
+  function lineLength(p) { let L = 0; for (let i = 1; i < p.length; i++) L += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]); return L; }
+  function along(p, step, start) {
+    const out = []; const total = lineLength(p); if (total <= 0) return out;
+    let s = start == null ? step / 2 : start, acc = 0;
+    for (let i = 1; i < p.length; i++) {
+      const [x1, y1] = p[i - 1], [x2, y2] = p[i], L = Math.hypot(x2 - x1, y2 - y1);
+      while (s <= acc + L + 1e-9) { const t = L ? (s - acc) / L : 0; out.push([x1 + t * (x2 - x1), y1 + t * (y2 - y1), Math.atan2(y2 - y1, x2 - x1)]); s += step; }
+      acc += L;
+    }
+    return out;
+  }
+  function circlePts(cx, cy, r, n, a0 = 0, a1 = 2 * Math.PI, closedArc) {
+    const full = Math.abs(a1 - a0) >= 2 * Math.PI - 1e-9, out = [];
+    const m = full ? n : n + 1;
+    for (let i = 0; i < m; i++) { const a = a0 + ((a1 - a0) * i) / n; out.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); }
+    return out;
+  }
+  function blobPts(cx, cy, rx, ry, seed) {
+    const r = mulberry(seed), ph = [r() * 6.28, r() * 6.28, r() * 6.28], out = [], n = 36, j = 0.16;
+    for (let i = 0; i < n; i++) {
+      const a = (2 * Math.PI * i) / n;
+      const k = 1 + (j * (Math.sin(2 * a + ph[0]) + 0.6 * Math.sin(3 * a + ph[1]) + 0.3 * Math.sin(5 * a + ph[2]))) / 1.9;
+      out.push([cx + rx * k * Math.cos(a), cy + ry * k * Math.sin(a)]);
+    }
+    return out;
+  }
+  GC.util = { smooth, area, ccw, centroid, inPoly, labelPoint, band, offsetLine, along, circlePts, mulberry, edgeDist, lineLength };
+
+  // ------------------------------------------------------------------ parsing
+  GC.parse = function (text) {
+    let t = String(text || "").trim();
+    const fence = t.match(/```(?:json|JSON)?\s*([\s\S]*?)```/);
+    if (fence) t = fence[1].trim();
+    if (!t.startsWith("{")) { const i = t.indexOf("{"), j = t.lastIndexOf("}"); if (i >= 0 && j > i) t = t.slice(i, j + 1); }
+    // tolerate // comments and trailing commas (common in pasted AI output)
+    t = t.replace(/(^|[^:"'])\/\/[^\n]*/g, "$1").replace(/,\s*([}\]])/g, "$1")
+      .replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+    try { return { layout: JSON.parse(t) }; }
+    catch (e) {
+      const m = /position (\d+)/.exec(e.message);
+      let where = "";
+      if (m) { const pos = +m[1]; const line = t.slice(0, pos).split("\n").length; where = ` (around line ${line})`; }
+      return { error: `The layout text isn't complete or has a typing slip${where}. Copy the whole layout block from the Gem again, including the first { and the last }.` };
+    }
+  };
+
+  // ------------------------------------------------------------------ shapes
+  function rectInfo(s, itemRotate) {
+    const [x, y, w, d] = s.rect.map(Number);
+    const ang = rad(Number(s.rotate != null ? s.rotate : itemRotate || 0));
+    return { cx: x + w / 2, cy: y + d / 2, w, d, ang };
+  }
+  function rectCorners(R) {
+    const c = Math.cos(R.ang), s = Math.sin(R.ang);
+    return [[-R.w / 2, -R.d / 2], [R.w / 2, -R.d / 2], [R.w / 2, R.d / 2], [-R.w / 2, R.d / 2]].map(([u, v]) => [R.cx + u * c - v * s, R.cy + u * s + v * c]);
+  }
+  function shapeOf(item) {
+    const s = item.shape || item;
+    if (Array.isArray(s)) return { kind: "points", poly: ccw(cleanPoly(s.map((q) => [+q[0], +q[1]]))) };
+    if (s.rect) { const R = rectInfo(s, item.rotate); return { kind: "rect", R, poly: ccw(rectCorners(R)) }; }
+    if (s.circle) { const [cx, cy, r] = s.circle.map(Number); return { kind: "circle", cx, cy, r, poly: circlePts(cx, cy, r, 48) }; }
+    if (s.ellipse) { const [cx, cy, rx, ry] = s.ellipse.map(Number); const p = []; for (let i = 0; i < 48; i++) { const a = (2 * Math.PI * i) / 48; p.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); } return { kind: "ellipse", poly: p }; }
+    if (s.blob) { const [cx, cy, rx, ry] = s.blob.map(Number); return { kind: "blob", poly: blobPts(cx, cy, rx, ry || rx, hashStr(JSON.stringify(s.blob))) }; }
+    if (s.arc) {
+      const [cx, cy, r1, r2, a0, a1] = s.arc.map(Number);
+      const n = Math.max(8, Math.round(Math.abs(a1 - a0) / 6));
+      const outer = circlePts(cx, cy, Math.max(r1, r2), n, rad(a0), rad(a1));
+      const inner = circlePts(cx, cy, Math.min(r1, r2), n, rad(a0), rad(a1)).reverse();
+      return { kind: "arc", cx, cy, r1, r2, a0, a1, poly: ccw(outer.concat(inner)) };
+    }
+    if (s.path) { const w = Number(s.width || item.width || 1.0); let pts = s.path.map((q) => [+q[0], +q[1]]); if (s.curve || item.curve) pts = smooth(pts); return { kind: "path", poly: ccw(band(pts, w)) }; }
+    if (s.points) return { kind: "points", poly: ccw(cleanPoly(s.points.map((q) => [+q[0], +q[1]]))) };
+    return null;
+  }
+  GC.shapeOf = shapeOf;
+
+  // ------------------------------------------------------------------ normalise + validate
+  GC.normalise = function (L) {
+    const errors = [], warnings = [], E = (m) => errors.push(m), W = (m) => warnings.push(m);
+    const isPt = (p) => Array.isArray(p) && p.length >= 2 && isFinite(p[0]) && isFinite(p[1]);
+    const M = { project: L.project || {}, zones: [], lines: [], buildings: [], structures: [], trees: [], shrubs: [], features: [], labels: [] };
+    M.north = Number(M.project.north || 0);
+    // site
+    const site = L.site || {};
+    const bShape = site.boundary ? shapeOf({ shape: Array.isArray(site.boundary) ? { points: site.boundary } : site.boundary }) : null;
+    if (!bShape || bShape.poly.length < 3) { E("The layout needs a site boundary (site.boundary) - at least three corner points in metres."); return { errors, warnings }; }
+    M.boundary = bShape.poly;
+    M.ground = ZONES[ZONE_ALIASES[site.ground] || site.ground] ? (ZONE_ALIASES[site.ground] || site.ground) : "lawn";
+    M.groundLabel = site.label ? String(site.label) : "";
+    M.groundLabelAt = isPt(site.label_at) ? site.label_at.map(Number) : null;
+
+    const checkShape = (where, item) => {
+      let sh = null;
+      try { sh = shapeOf(item); } catch (e) { sh = null; }
+      if (!sh || !sh.poly || sh.poly.length < 3 || sh.poly.some((q) => !isFinite(q[0]) || !isFinite(q[1]))) {
+        E(`${where}: its shape is missing or incomplete. Use rect [x, y, width, depth], circle [x, y, radius], blob, arc, path or points.`); return null;
+      }
+      if (Math.abs(area(sh.poly)) < 0.02) { E(`${where}: its shape has (almost) no area.`); return null; }
+      return sh;
+    };
+
+    (L.zones || []).forEach((z, i) => {
+      const t0 = String(z.type || "").toLowerCase().replace(/[\s-]+/g, "_");
+      const t = ZONES[t0] ? t0 : ZONE_ALIASES[t0];
+      const where = `Zone ${i + 1} (${z.label || z.type || "no type"})`;
+      if (!t) { E(`${where}: "${z.type}" isn't a zone type I know. Use one of: ${Object.keys(ZONES).join(", ")}.`); return; }
+      const sh = checkShape(where, z); if (!sh) return;
+      M.zones.push({ type: t, poly: sh.poly, label: z.label === undefined ? ZONES[t].label : String(z.label || ""),
+        labelAt: isPt(z.label_at) ? z.label_at.map(Number) : null, fill: z.fill === undefined ? true : z.fill, seed: hashStr(JSON.stringify(z)) + i });
+    });
+    (L.lines || []).forEach((l, i) => {
+      const t = String(l.type || "").toLowerCase().replace(/[\s-]+/g, "_");
+      const where = `Line ${i + 1} (${l.label || l.type || "no type"})`;
+      if (!LINES[t]) { E(`${where}: "${l.type}" isn't a line type I know. Use one of: ${Object.keys(LINES).join(", ")}.`); return; }
+      let pts = (l.points || []).filter(isPt).map((q) => [+q[0], +q[1]]);
+      if (pts.length < 2) { E(`${where}: needs at least two points.`); return; }
+      const curve = l.curve != null ? !!l.curve : t === "stepping_stones" || t === "hedge" ? pts.length > 2 : false;
+      if (curve) pts = smooth(pts);
+      const size = Number(l.size || l.thickness || LINES[t].t);
+      M.lines.push({ type: t, pts, h: Number(l.height || LINES[t].h), t: size, spacing: Number(l.spacing || Math.max(size + 0.15, 0.6)),
+        label: l.label || "", labelAt: isPt(l.label_at) ? l.label_at.map(Number) : null, seed: hashStr(JSON.stringify(l)) + i });
+    });
+    (L.buildings || []).forEach((b, i) => {
+      const t = String(b.type || "house").toLowerCase();
+      const where = `Building ${i + 1} (${b.label || t})`;
+      if (!BUILDINGS.includes(t)) W(`${where}: type "${b.type}" treated as a house.`);
+      const sh = checkShape(where, b); if (!sh) return;
+      const storeys = Number(b.storeys || (t === "house" ? 2 : 1));
+      const roof = String(b.roof || (t === "house" ? "hip" : "flat")).toLowerCase();
+      M.buildings.push({ type: t, sh, poly: sh.poly, storeys, h: Number(b.height || storeys * 2.7), roof, ridge: b.ridge || null,
+        label: b.label || "", labelAt: isPt(b.label_at) ? b.label_at.map(Number) : null });
+      if (roof !== "flat" && sh.kind !== "rect") W(`${where}: a ${roof} roof needs a rect shape - drawn with a flat roof instead.`);
+    });
+    (L.structures || []).forEach((s, i) => {
+      const t = String(s.type || "").toLowerCase().replace(/[\s-]+/g, "_");
+      const where = `Structure ${i + 1} (${s.label || s.type || "no type"})`;
+      if (!STRUCTURES.includes(t)) { E(`${where}: "${s.type}" isn't a structure I know. Use one of: ${STRUCTURES.join(", ")}.`); return; }
+      const sh = checkShape(where, s); if (!sh) return;
+      if (t === "gazebo" && sh.kind !== "circle") { E(`${where}: give a gazebo a circle shape [x, y, radius].`); return; }
+      if (t !== "gazebo" && !(sh.kind === "rect" || (t === "pergola" && sh.kind === "arc"))) {
+        E(`${where}: give it a rect shape [x, y, width, depth]${t === "pergola" ? " or an arc for a curved pergola" : ""}.`); return;
+      }
+      M.structures.push({ type: t, sh, poly: sh.poly, h: s.height ? Number(s.height) : null, label: s.label === undefined ? "" : s.label,
+        labelAt: isPt(s.label_at) ? s.label_at.map(Number) : null });
+    });
+    (L.planting || []).forEach((p, i) => {
+      const t = String(p.type || "tree").toLowerCase();
+      if (!isPt(p.at)) { E(`Planting ${i + 1}: needs "at": [x, y].`); return; }
+      const at = p.at.map(Number);
+      if (t === "tree") {
+        const size = TREE_SIZES[p.size] ? p.size : "medium";
+        const base = TREE_SIZES[size];
+        M.trees.push({ x: at[0], y: at[1], h: Number(p.height || base.h), r: Number(p.spread ? p.spread / 2 : base.r), form: p.form || "round", seed: hashStr(JSON.stringify(p)) + i });
+      } else {
+        const r = { small: 0.35, medium: 0.55, large: 0.8 }[p.size] || 0.5;
+        M.shrubs.push({ x: at[0], y: at[1], r, h: r * 1.5, tone: i % 4, seed: hashStr(JSON.stringify(p)) + i });
+      }
+    });
+    (L.features || []).forEach((f, i) => {
+      const t = String(f.type || "").toLowerCase().replace(/[\s-]+/g, "_");
+      if (!FEATURES[t]) { E(`Feature ${i + 1}: "${f.type}" isn't a feature I know. Use one of: ${Object.keys(FEATURES).join(", ")}.`); return; }
+      if (!isPt(f.at)) { E(`Feature ${i + 1} (${t}): needs "at": [x, y].`); return; }
+      M.features.push({ type: t, x: +f.at[0], y: +f.at[1], size: Number(f.size || FEATURES[t]), rot: rad(Number(f.rotate || 0)), label: f.label || "", labelAt: isPt(f.label_at) ? f.label_at.map(Number) : null });
+    });
+    (L.labels || []).forEach((l, i) => {
+      if (!l.text || !isPt(l.at)) { W(`Label ${i + 1} skipped: it needs "text" and "at".`); return; }
+      M.labels.push({ text: String(l.text), at: l.at.map(Number), pointer: isPt(l.pointer) ? l.pointer.map(Number) : null, boxed: l.style === "box" || !!l.pointer });
+    });
+
+    // automatic loose planting in planting zones (concept only - no species)
+    M.zones.forEach((z) => {
+      if (z.type !== "planting" || z.fill === false) return;
+      const rnd = mulberry(z.seed), poly = z.poly;
+      const xs = poly.map((q) => q[0]), ys = poly.map((q) => q[1]);
+      const step = z.fill === "dense" ? 0.8 : z.fill === "sparse" ? 1.5 : 1.05;
+      const X0 = Math.min(...xs), X1 = Math.max(...xs), Y0 = Math.min(...ys), Y1 = Math.max(...ys);
+      const nx = Math.max(1, Math.floor((X1 - X0) / step)), ny = Math.max(1, Math.floor((Y1 - Y0) / step));
+      const sx = X0 + (X1 - X0 - (nx - 1) * step) / 2, sy = Y0 + (Y1 - Y0 - (ny - 1) * step) / 2;
+      let n = 0;
+      for (let ix = 0; ix < nx; ix++)
+        for (let iy = 0; iy < ny; iy++) {
+          const x = sx + ix * step, y = sy + iy * step;
+          const q = [x + (rnd() - 0.5) * step * 0.5, y + (rnd() - 0.5) * step * 0.5];
+          const ed = inPoly(q, poly) ? edgeDist(q, poly) : -1;
+          if (ed < 0.18) continue;
+          const r = Math.min(0.3 + rnd() * 0.25, ed * 1.05);
+          if (n < 300) {
+            // skip spots that a later hard zone covers
+            M.shrubs.push({ x: q[0], y: q[1], r, h: r * (1.2 + rnd() * 0.8), tone: Math.floor(rnd() * 4), seed: Math.floor(rnd() * 1e9), auto: true, zone: z });
+            n++;
+          }
+        }
+    });
+    // drop auto shrubs hidden under later zones / buildings
+    M.shrubs = M.shrubs.filter((s) => {
+      if (!s.auto) return true;
+      const zi = M.zones.indexOf(s.zone);
+      for (let k = zi + 1; k < M.zones.length; k++) if (inPoly([s.x, s.y], M.zones[k].poly)) return false;
+      for (const b of M.buildings.concat(M.structures)) if (b.type !== "pergola" && inPoly([s.x, s.y], b.poly)) return false;
+      return true;
+    });
+
+    // extents
+    const pts = [].concat(M.boundary, ...M.zones.map((z) => z.poly), ...M.buildings.map((b) => b.poly), ...M.structures.map((s) => s.poly), ...M.lines.map((l) => l.pts));
+    M.trees.forEach((t) => pts.push([t.x - t.r, t.y - t.r], [t.x + t.r, t.y + t.r]));
+    const textBox = (str, at) => { const w = Math.max(...String(str).split("\n").map((t) => t.length)) * 0.13 + 0.5; pts.push([at[0] - w, at[1] - 0.6], [at[0] + w, at[1] + 0.6]); };
+    M.labels.forEach((l) => textBox(l.text, l.at));
+    M.features.forEach((f) => { pts.push([f.x, f.y]); if (f.label) textBox(f.label, f.labelAt || [f.x + 1.6, f.y - 1.6]); });
+    M.lines.forEach((l) => { if (l.label && l.labelAt) textBox(l.label, l.labelAt); });
+    const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+    M.ext = { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
+    const bx = M.boundary.map((q) => q[0]), by = M.boundary.map((q) => q[1]);
+    if (Math.max(...bx) - Math.min(...bx) > 300 || Math.max(...by) - Math.min(...by) > 300) W("The site is over 300 m across - check the layout is in metres, not millimetres.");
+    if (!M.zones.length) W("No zones yet - the plan will just show the site boundary.");
+    return { model: M, errors, warnings };
+  };
+
+  // ------------------------------------------------------------------ 3D geometry
+  function Obj(name, group) { return { name, group, parts: {} }; }
+  function part(o, colour) { return (o.parts[colour] = o.parts[colour] || []); }
+  function tri(o, colour, a, b, c, out) {
+    // out: optional reference point; flips winding so the face points away from it
+    if (out) {
+      const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const mx = (a[0] + b[0] + c[0]) / 3 - out[0], my = (a[1] + b[1] + c[1]) / 3 - out[1], mz = (a[2] + b[2] + c[2]) / 3 - out[2];
+      if (nx * mx + ny * my + nz * mz < 0) { const t = b; b = c; c = t; }
+    }
+    part(o, colour).push(a, b, c);
+  }
+  function quad(o, colour, a, b, c, d, out) { tri(o, colour, a, b, c, out); tri(o, colour, a, c, d, out); }
+  function flat(o, colour, poly, z, down) {
+    const p = ccw(poly), T = triangulate(p);
+    for (const [i, j, k] of T) {
+      if (down) tri(o, colour, [p[i][0], p[i][1], z], [p[k][0], p[k][1], z], [p[j][0], p[j][1], z]);
+      else tri(o, colour, [p[i][0], p[i][1], z], [p[j][0], p[j][1], z], [p[k][0], p[k][1], z]);
+    }
+  }
+  function prism(o, colour, poly, z0, z1, top) {
+    const p = ccw(poly);
+    flat(o, top || colour, p, z1);
+    for (let i = 0; i < p.length; i++) {
+      const a = p[i], b = p[(i + 1) % p.length];
+      tri(o, colour, [a[0], a[1], z0], [b[0], b[1], z0], [b[0], b[1], z1]);
+      tri(o, colour, [a[0], a[1], z0], [b[0], b[1], z1], [a[0], a[1], z1]);
+    }
+  }
+  function box(o, colour, cx, cy, w, d, z0, z1, ang = 0, top) {
+    prism(o, colour, rectCorners({ cx, cy, w, d, ang }), z0, z1, top);
+  }
+  function beam(o, colour, a, b, w, z0, z1) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy); if (L < 1e-6) return;
+    box(o, colour, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, L, w, z0, z1, Math.atan2(dy, dx));
+  }
+  function cylinder(o, colour, cx, cy, r, z0, z1, n = 16, top) { prism(o, colour, circlePts(cx, cy, r, n), z0, z1, top); }
+  function cone(o, colour, cx, cy, r, z0, z1, n = 12) {
+    const p = circlePts(cx, cy, r, n), apex = [cx, cy, z1], ref = [cx, cy, z0 - 0.01];
+    for (let i = 0; i < n; i++) { const a = p[i], b = p[(i + 1) % n]; tri(o, colour, [a[0], a[1], z0], [b[0], b[1], z0], apex, [cx, cy, z0]); }
+  }
+  const ICO = (() => {
+    const t = (1 + Math.sqrt(5)) / 2;
+    let v = [[-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0], [0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t], [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]].map((p) => { const L = Math.hypot(...p); return p.map((x) => x / L); });
+    let f = [[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8], [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9], [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]];
+    const mid = {}; const getMid = (a, b) => { const k = a < b ? a + "_" + b : b + "_" + a; if (mid[k] != null) return mid[k]; const p = v[a].map((x, i) => (x + v[b][i]) / 2); const L = Math.hypot(...p); v.push(p.map((x) => x / L)); return (mid[k] = v.length - 1); };
+    const f2 = []; for (const [a, b, c] of f) { const ab = getMid(a, b), bc = getMid(b, c), ca = getMid(c, a); f2.push([a, ab, ca], [b, bc, ab], [c, ca, bc], [ab, bc, ca]); }
+    return { v, f: f2 };
+  })();
+  function blobSphere(o, colour, cx, cy, cz, rx, ry, rz, seed) {
+    const r = mulberry(seed);
+    const jit = ICO.v.map(() => 0.88 + r() * 0.2);
+    const P = ICO.v.map((p, i) => [cx + p[0] * rx * jit[i], cy + p[1] * ry * jit[i], cz + p[2] * rz * jit[i]]);
+    for (const [a, b, c] of ICO.f) tri(o, colour, P[a], P[b], P[c], [cx, cy, cz]);
+  }
+  const GREENS = [["#5f7d3a", "#7c9a4c", "#9cb766"], ["#6e8a45", "#8ea85a", "#b3c77d"], ["#4f6e3a", "#6a8c4c", "#86a964"], ["#7d8f46", "#a0ad5d", "#c4c87c"]];
+  const SHRUBS = [["#4c6b33", "#68873f"], ["#5d7a3a", "#7a9850"], ["#3f5f35", "#587a45"], ["#6f7e3c", "#8f9c52"]];
+  GC.GREENS = GREENS; GC.SHRUBS = SHRUBS;
+
+  function hipRoof(o, colour, R, ze, zr, over = 0.3) {
+    const w = R.w + 2 * over, d = R.d + 2 * over;
+    const c = Math.cos(R.ang), s = Math.sin(R.ang);
+    const W = (u, v, z) => [R.cx + u * c - v * s, R.cy + u * s + v * c, z];
+    const ref = [R.cx, R.cy, ze - 2];
+    const x0 = -w / 2, x1 = w / 2, y0 = -d / 2, y1 = d / 2;
+    if (w >= d) {
+      const r0 = W(x0 + d / 2, 0, zr), r1 = W(x1 - d / 2, 0, zr);
+      quad(o, colour, W(x0, y0, ze), W(x1, y0, ze), r1, r0, ref);
+      quad(o, colour, W(x1, y1, ze), W(x0, y1, ze), r0, r1, ref);
+      tri(o, colour, W(x1, y0, ze), W(x1, y1, ze), r1, ref);
+      tri(o, colour, W(x0, y1, ze), W(x0, y0, ze), r0, ref);
+    } else {
+      const r0 = W(0, y0 + w / 2, zr), r1 = W(0, y1 - w / 2, zr);
+      quad(o, colour, W(x1, y0, ze), W(x1, y1, ze), r1, r0, ref);
+      quad(o, colour, W(x0, y1, ze), W(x0, y0, ze), r0, r1, ref);
+      tri(o, colour, W(x0, y0, ze), W(x1, y0, ze), r0, ref);
+      tri(o, colour, W(x1, y1, ze), W(x0, y1, ze), r1, ref);
+    }
+    // soffit underneath
+    quad(o, colour, W(x0, y0, ze), W(x0, y1, ze), W(x1, y1, ze), W(x1, y0, ze), [R.cx, R.cy, ze + 5]);
+  }
+  function gableRoof(o, colour, endColour, R, ze, zr, alongLong = true, over = 0.25) {
+    // ridge runs along the longer side unless told otherwise
+    let w = R.w, d = R.d, ang = R.ang;
+    if ((alongLong && d > w) || (!alongLong && w > d)) { w = R.d; d = R.w; ang = R.ang + Math.PI / 2; }
+    const c = Math.cos(ang), s = Math.sin(ang);
+    const W = (u, v, z) => [R.cx + u * c - v * s, R.cy + u * s + v * c, z];
+    const ref = [R.cx, R.cy, ze - 2];
+    const x0 = -w / 2 - over, x1 = w / 2 + over, y0 = -d / 2 - over, y1 = d / 2 + over;
+    quad(o, colour, W(x0, y0, ze), W(x1, y0, ze), W(x1, 0, zr), W(x0, 0, zr), ref);
+    quad(o, colour, W(x1, y1, ze), W(x0, y1, ze), W(x0, 0, zr), W(x1, 0, zr), ref);
+    quad(o, colour, W(x0, y0, ze), W(x0, y1, ze), W(x1, y1, ze), W(x1, y0, ze), [R.cx, R.cy, ze + 5]);
+    // gable end walls
+    const ref2 = [R.cx, R.cy, (ze + zr) / 2];
+    tri(o, endColour, W(-w / 2, -d / 2, ze), W(-w / 2, d / 2, ze), W(-w / 2, 0, zr), ref2);
+    tri(o, endColour, W(w / 2, -d / 2, ze), W(w / 2, d / 2, ze), W(w / 2, 0, zr), ref2);
+  }
+
+  GC.build3D = function (M) {
+    const objs = [];
+    const add = (o) => { if (Object.keys(o.parts).length) objs.push(o); return o; };
+    // ground (site)
+    const g = Obj("Site ground", "Ground"); flat(g, ZONES[M.ground].colour, M.boundary, 0); add(g);
+    // zones (later zones sit slightly higher so faces never fight)
+    M.zones.forEach((z, i) => {
+      const o = Obj(`${(z.label || z.type).replace(/\n/g, " ")} (${z.type.replace(/_/g, " ")})`, "Surfaces");
+      const zz = 0.005 * (i + 1);
+      const info = ZONES[z.type];
+      if (info.height) prism(o, info.colour, z.poly, 0, info.height, info.top);
+      else flat(o, info.colour, z.poly, zz);
+      add(o);
+    });
+    // lines
+    M.lines.forEach((l, i) => {
+      const o = Obj(l.label || l.type.replace(/_/g, " "), "Boundaries & walls");
+      const col = LINES[l.type].colour;
+      if (l.type === "fence" || l.type === "trellis") {
+        prism(o, col, band(l.pts, l.t), 0.05, l.h);
+        for (const [x, y, a] of along(l.pts, 1.8, 0)) box(o, col, x, y, 0.1, 0.1, 0, l.h + 0.05, a);
+      } else if (l.type === "screen") {
+        for (const [x, y, a] of along(l.pts, 0.16, 0.08)) box(o, col, x, y, 0.07, l.t, 0, l.h, a);
+        const end = l.pts.length - 1;
+        for (let k = 1; k <= end; k++) beam(o, col, l.pts[k - 1], l.pts[k], l.t + 0.04, l.h, l.h + 0.08);
+      } else if (l.type === "hedge") {
+        prism(o, col, band(l.pts, l.t), 0, l.h, "#5f7f45");
+      } else if (l.type === "stepping_stones") {
+        const r = mulberry(l.seed);
+        for (const [x, y, a] of along(l.pts, l.spacing, l.t / 2)) {
+          const st = []; for (let k = 0; k < 9; k++) { const tt = (k / 9) * 2 * Math.PI; const rr = (l.t / 2) * (0.85 + r() * 0.2); st.push([x + rr * Math.cos(tt + a), y + rr * 0.75 * Math.sin(tt + a)]); }
+          prism(o, col, st, 0.01, 0.06 + 0.002 * i);
+        }
+      } else {
+        prism(o, col, band(l.pts, l.t), 0, l.h);
+      }
+      add(o);
+    });
+    // buildings
+    M.buildings.forEach((b) => {
+      const o = Obj(b.label || b.type, "Buildings");
+      const hasPitch = b.roof !== "flat" && b.sh.kind === "rect";
+      prism(o, C.house, b.poly, 0, b.h, hasPitch ? C.house : C.roofFlat);
+      if (hasPitch) {
+        const R = b.sh.R, span = Math.min(R.w, R.d);
+        const zr = b.h + span * 0.42;
+        if (b.roof === "gable") gableRoof(o, C.roof, C.house, R, b.h, zr, b.ridge !== "short");
+        else hipRoof(o, C.roof, R, b.h, zr);
+      }
+      add(o);
+    });
+    // structures
+    M.structures.forEach((s) => {
+      const o = Obj(s.label || s.type.replace(/_/g, " "), "Structures");
+      const t = s.type;
+      if (t === "pergola" && s.sh.kind === "arc") {
+        const { cx, cy, r1, r2, a0, a1 } = s.sh; const rin = Math.min(r1, r2), rout = Math.max(r1, r2);
+        const h = s.h || 2.6, span = Math.abs(a1 - a0), nPosts = Math.max(3, Math.round(((span / 360) * 2 * Math.PI * rout) / 2.2) + 1);
+        const pi = rin + 0.15, po = rout - 0.15;
+        for (let k = 0; k < nPosts; k++) {
+          const a = rad(a0 + ((a1 - a0) * k) / (nPosts - 1));
+          for (const rr of [pi, po]) box(o, C.white, cx + rr * Math.cos(a), cy + rr * Math.sin(a), 0.15, 0.15, 0, h, a);
+        }
+        const seg = Math.max(8, Math.round(span / 7));
+        for (const rr of [pi, po]) for (let k = 0; k < seg; k++) {
+          const aa = rad(a0 + ((a1 - a0) * k) / seg), ab = rad(a0 + ((a1 - a0) * (k + 1)) / seg);
+          beam(o, C.white, [cx + rr * Math.cos(aa), cy + rr * Math.sin(aa)], [cx + rr * Math.cos(ab), cy + rr * Math.sin(ab)], 0.14, h, h + 0.2);
+        }
+        const nr = Math.max(6, Math.round(((span / 360) * 2 * Math.PI * (rin + rout) / 2) / 0.55));
+        for (let k = 0; k < nr; k++) {
+          const a = rad(a0 + ((a1 - a0) * (k + 0.5)) / nr);
+          beam(o, C.white, [cx + (rin - 0.25) * Math.cos(a), cy + (rin - 0.25) * Math.sin(a)], [cx + (rout + 0.25) * Math.cos(a), cy + (rout + 0.25) * Math.sin(a)], 0.08, h + 0.2, h + 0.35);
+        }
+      } else if (t === "pergola") {
+        const R = s.sh.R, h = s.h || 2.5;
+        let w = R.w, d = R.d, ang = R.ang; if (d > w) { w = R.d; d = R.w; ang = R.ang + Math.PI / 2; }
+        const c = Math.cos(ang), sn = Math.sin(ang), P = (u, v) => [R.cx + u * c - v * sn, R.cy + u * sn + v * c];
+        const nPosts = Math.max(2, Math.ceil(w / 2.6) + 1);
+        for (let k = 0; k < nPosts; k++) { const u = -w / 2 + 0.1 + ((w - 0.2) * k) / (nPosts - 1); for (const v of [-d / 2 + 0.1, d / 2 - 0.1]) { const p = P(u, v); box(o, C.white, p[0], p[1], 0.15, 0.15, 0, h, ang); } }
+        for (const v of [-d / 2 + 0.1, d / 2 - 0.1]) beam(o, C.white, P(-w / 2 - 0.2, v), P(w / 2 + 0.2, v), 0.15, h, h + 0.2);
+        const nr = Math.max(3, Math.round(w / 0.5));
+        for (let k = 0; k <= nr; k++) { const u = -w / 2 + (w * k) / nr; beam(o, C.white, P(u, -d / 2 - 0.25), P(u, d / 2 + 0.25), 0.08, h + 0.2, h + 0.35); }
+      } else if (t === "gazebo") {
+        const { cx, cy, r } = s.sh, h = s.h || 2.4;
+        for (let k = 0; k < 6; k++) { const a = (k * Math.PI) / 3; box(o, C.white, cx + (r - 0.1) * Math.cos(a), cy + (r - 0.1) * Math.sin(a), 0.15, 0.15, 0, h, a); }
+        cone(o, C.roof, cx, cy, r + 0.3, h, h + r * 0.8, 6);
+      } else if (t === "carport") {
+        const R = s.sh.R, h = s.h || 2.5;
+        for (const [u, v] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+          const c = Math.cos(R.ang), sn = Math.sin(R.ang), uu = (u * (R.w / 2 - 0.15)), vv = (v * (R.d / 2 - 0.15));
+          box(o, C.white, R.cx + uu * c - vv * sn, R.cy + uu * sn + vv * c, 0.15, 0.15, 0, h, R.ang);
+        }
+        box(o, C.roofFlat, R.cx, R.cy, R.w + 0.2, R.d + 0.2, h, h + 0.2, R.ang);
+      } else {
+        const R = s.sh.R;
+        const cfg = { shed: [2.1, C.timber, C.roof], summerhouse: [2.3, "#e8e2d4", C.roof], greenhouse: [1.9, C.glass, C.glass], garden_room: [2.5, "#e8e2d4", C.roofFlat] }[t];
+        const h = s.h || cfg[0];
+        if (t === "garden_room") { prism(o, cfg[1], s.poly, 0, h, cfg[2]); box(o, cfg[2], R.cx, R.cy, R.w + 0.3, R.d + 0.3, h, h + 0.15, R.ang); }
+        else { prism(o, cfg[1], s.poly, 0, h); gableRoof(o, cfg[2], cfg[1], R, h, h + Math.min(R.w, R.d) * 0.35, true, 0.12); }
+      }
+      add(o);
+    });
+    // features
+    M.features.forEach((f) => {
+      const o = Obj(f.label || f.type.replace(/_/g, " "), "Features");
+      const { x, y, size: S, rot: a } = f;
+      switch (f.type) {
+        case "firebowl": cylinder(o, C.steel, x, y, S / 2, 0, 0.45, 18, C.fire); break;
+        case "dining_table": {
+          const c = Math.cos(a), s = Math.sin(a), P = (u, v) => [x + u * c - v * s, y + u * s + v * c];
+          box(o, C.timber, x, y, S, 0.9, 0.7, 0.76, a);
+          for (const [u, v] of [[-S / 2 + 0.1, -0.35], [S / 2 - 0.1, -0.35], [S / 2 - 0.1, 0.35], [-S / 2 + 0.1, 0.35]]) { const p = P(u, v); box(o, C.timber, p[0], p[1], 0.07, 0.07, 0, 0.7, a); }
+          for (const v of [-0.8, 0.8]) { const p = P(0, v); box(o, C.timber, p[0], p[1], S * 0.9, 0.35, 0.4, 0.46, a); box(o, C.timber, p[0], p[1], S * 0.85, 0.08, 0, 0.4, a); }
+          break;
+        }
+        case "bench": box(o, C.timber, x, y, S, 0.45, 0.4, 0.46, a); box(o, C.timber, x, y, S * 0.9, 0.08, 0, 0.4, a); break;
+        case "pot": cylinder(o, "#8b6a52", x, y, S / 2, 0, S * 0.8, 16, C.soil); blobSphere(o, "#6a8c4c", x, y, S * 0.8 + S * 0.25, S * 0.45, S * 0.45, S * 0.35, f.x * 7 + f.y); break;
+        case "water_feature": cylinder(o, C.stone, x, y, S / 2, 0, 0.5, 18, C.water); cylinder(o, C.stone, x, y, S * 0.12, 0.5, 0.9, 10); break;
+        case "sculpture": box(o, "#8c8c88", x, y, S, S, 0, S * 3, a); break;
+        case "boulder": blobSphere(o, C.stone, x, y, S * 0.15, S / 2, S * 0.42, S * 0.4, Math.round(x * 13 + y * 7)); break;
+        case "car": {
+          const c = Math.cos(a), s = Math.sin(a), P = (u, v) => [x + u * c - v * s, y + u * s + v * c];
+          box(o, C.car, x, y, S, 1.8, 0.25, 0.85, a);
+          const p = P(-S * 0.05, 0); box(o, "#9fb8d0", p[0], p[1], S * 0.5, 1.6, 0.85, 1.4, a);
+          for (const [u, v] of [[-S * 0.32, -0.8], [S * 0.32, -0.8], [S * 0.32, 0.8], [-S * 0.32, 0.8]]) { const q = P(u, v); cylinder(o, "#222", q[0], q[1], 0.32, 0, 0.3, 10); }
+          break;
+        }
+        case "person": cylinder(o, C.person, x, y, 0.17, 0, 1.35, 10); blobSphere(o, "#d9b38c", x, y, 1.55, 0.13, 0.13, 0.15, 3); break;
+        case "lounger": box(o, C.white, x, y, S, 0.65, 0.25, 0.35, a); break;
+        case "hot_tub": box(o, C.timber, x, y, S, S, 0, 0.9, a, C.water); break;
+        case "bin_store": box(o, C.timber, x, y, S, 0.9, 0, 1.3, a); break;
+      }
+      add(o);
+    });
+    // trees
+    M.trees.forEach((t, i) => {
+      const o = Obj(`Tree ${i + 1}`, "Planting");
+      const pal = GREENS[t.seed % GREENS.length], rnd = mulberry(t.seed);
+      if (t.form === "conifer") { cylinder(o, C.trunk, t.x, t.y, 0.12, 0, t.h * 0.25, 8); cone(o, pal[0], t.x, t.y, t.r, t.h * 0.2, t.h, 10); }
+      else {
+        const trunks = t.form === "multistem" ? 3 : 1;
+        for (let k = 0; k < trunks; k++) {
+          const dx = trunks > 1 ? Math.cos((k * 2 * Math.PI) / 3) * 0.3 : 0, dy = trunks > 1 ? Math.sin((k * 2 * Math.PI) / 3) * 0.3 : 0;
+          cylinder(o, C.trunk, t.x + dx, t.y + dy, trunks > 1 ? 0.08 : 0.14, 0, t.h * 0.55, 8);
+        }
+        const upright = t.form === "upright";
+        const n = t.form === "airy" ? 7 : 5;
+        const cz = t.h - t.r * (upright ? 1.3 : 0.95);
+        for (let k = 0; k < n; k++) {
+          const a = rnd() * 6.28, rr = rnd() * t.r * 0.45;
+          const sx = t.r * (0.55 + rnd() * 0.2) * (upright ? 0.75 : 1);
+          blobSphere(o, pal[k % 3], t.x + rr * Math.cos(a), t.y + rr * Math.sin(a), cz + (rnd() - 0.4) * t.r * (upright ? 1.0 : 0.6), sx, sx, sx * (upright ? 1.5 : 0.85), Math.floor(rnd() * 1e9));
+        }
+      }
+      add(o);
+    });
+    // shrubs: one object per zone (keeps the SketchUp outliner tidy)
+    const shrubGroups = new Map();
+    M.shrubs.forEach((s) => {
+      const key = s.zone ? s.zone : "free";
+      if (!shrubGroups.has(key)) shrubGroups.set(key, Obj(s.zone ? `Planting mass ${M.zones.indexOf(s.zone) + 1}` : "Shrubs", "Planting"));
+      const o = shrubGroups.get(key), pal = SHRUBS[s.tone % SHRUBS.length];
+      blobSphere(o, pal[s.seed % 2], s.x, s.y, s.h * 0.45, s.r, s.r, s.h * 0.55, s.seed);
+    });
+    shrubGroups.forEach((o) => add(o));
+    return objs;
+  };
+
+  // ------------------------------------------------------------------ COLLADA (.dae) for SketchUp
+  function esc(s) { return String(s).replace(/[<>&"']/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&apos;" }[c])); }
+  function hexToRgb(h) { h = h.replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); }
+  GC.toDAE = function (objs, M) {
+    const colours = [...new Set(objs.flatMap((o) => Object.keys(o.parts)))];
+    const mid = (c) => "mat" + colours.indexOf(c);
+    const r6 = (v) => (Math.round(v * 1e5) / 1e5).toString();
+    let geoms = "", effects = "", materials = "";
+    colours.forEach((c) => {
+      const [r, g, b] = hexToRgb(c);
+      effects += `<effect id="${mid(c)}-fx"><profile_COMMON><technique sid="common"><lambert><diffuse><color>${r.toFixed(4)} ${g.toFixed(4)} ${b.toFixed(4)} 1</color></diffuse></lambert></technique></profile_COMMON></effect>\n`;
+      materials += `<material id="${mid(c)}" name="${mid(c)}_${c.replace("#", "")}"><instance_effect url="#${mid(c)}-fx"/></material>\n`;
+    });
+    const groups = new Map();
+    objs.forEach((o, oi) => {
+      const pos = [], nor = [], tris = {};
+      const vIndex = new Map();
+      Object.entries(o.parts).forEach(([colour, verts]) => {
+        const idx = (tris[colour] = []);
+        for (let k = 0; k < verts.length; k += 3) {
+          const a = verts[k], b = verts[k + 1], c = verts[k + 2];
+          const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+          let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const L = Math.hypot(nx, ny, nz);
+          if (L < 1e-12) continue;
+          nx /= L; ny /= L; nz /= L;
+          const ni = nor.length / 3; nor.push(nx, ny, nz);
+          for (const v of [a, b, c]) {
+            const key = r6(v[0]) + "," + r6(v[1]) + "," + r6(v[2]);
+            let vi = vIndex.get(key); if (vi == null) { vi = pos.length / 3; pos.push(v[0], v[1], v[2]); vIndex.set(key, vi); }
+            idx.push(vi, ni);
+          }
+        }
+      });
+      const gid = `g${oi}`;
+      let tr = "";
+      Object.entries(tris).forEach(([colour, idx]) => { if (idx.length) tr += `<triangles material="${mid(colour)}" count="${idx.length / 6}"><input semantic="VERTEX" source="#${gid}-v" offset="0"/><input semantic="NORMAL" source="#${gid}-n" offset="1"/><p>${idx.join(" ")}</p></triangles>`; });
+      geoms += `<geometry id="${gid}" name="${esc(o.name)}"><mesh>` +
+        `<source id="${gid}-p"><float_array id="${gid}-pa" count="${pos.length}">${pos.map(r6).join(" ")}</float_array><technique_common><accessor source="#${gid}-pa" count="${pos.length / 3}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>` +
+        `<source id="${gid}-n"><float_array id="${gid}-na" count="${nor.length}">${nor.map(r6).join(" ")}</float_array><technique_common><accessor source="#${gid}-na" count="${nor.length / 3}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>` +
+        `<vertices id="${gid}-v"><input semantic="POSITION" source="#${gid}-p"/></vertices>` +
+        tr + `</mesh></geometry>\n`;
+      if (!groups.has(o.group)) groups.set(o.group, []);
+      const bind = Object.keys(tris).map((c) => `<instance_material symbol="${mid(c)}" target="#${mid(c)}"/>`).join("");
+      groups.get(o.group).push(`<node id="n${oi}" name="${esc(o.name)}"><instance_geometry url="#${gid}"><bind_material><technique_common>${bind}</technique_common></bind_material></instance_geometry></node>`);
+    });
+    let nodes = "";
+    let gi = 0;
+    groups.forEach((list, name) => { nodes += `<node id="grp${gi++}" name="${esc(name)}">${list.join("")}</node>\n`; });
+    const title = esc(M.project.name || "Garden concept");
+    const now = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+    return `<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+<asset><contributor><authoring_tool>Garden Concept Converter</authoring_tool></contributor><created>${now}</created><modified>${now}</modified><title>${title}</title><unit name="meter" meter="1"/><up_axis>Z_UP</up_axis></asset>
+<library_effects>
+${effects}</library_effects>
+<library_materials>
+${materials}</library_materials>
+<library_geometries>
+${geoms}</library_geometries>
+<library_visual_scenes><visual_scene id="scene" name="${title}"><node id="root" name="${title}">
+${nodes}</node></visual_scene></library_visual_scenes>
+<scene><instance_visual_scene url="#scene"/></scene>
+</COLLADA>
+`;
+  };
+
+  // ------------------------------------------------------------------ DXF (R12, 2D base plan, metres)
+  GC.toDXF = function (M) {
+    const out = [];
+    const P = (code, val) => out.push(String(code), String(val));
+    const layers = new Map();
+    const aci = { BOUNDARY: 7, LAWN: 3, PLANTING: 32, PAVING: 8, SANDSTONE: 41, RESIN_BOUND: 9, GRAVEL: 33, HOGGIN: 33, DECKING: 30,
+      WATER: 5, POOL: 5, RAISED_BED: 30, VEG_BED: 30, BARK: 32, MEADOW: 83, BUILDING: 7, STRUCTURE: 7, WALL: 8, RETAINING_WALL: 8,
+      FENCE: 32, SCREEN: 32, HEDGE: 94, TRELLIS: 7, EDGING: 8, TREE: 94, SHRUB: 96, FEATURE: 7, LABEL: 7 };
+    const lay = (name) => { const k = "GC-" + name.toUpperCase(); if (!layers.has(k)) layers.set(k, aci[name.toUpperCase()] || 7); return k; };
+    const ents = [];
+    const E = (...kv) => ents.push(kv);
+    const poly = (pts, layer, closed = true) => {
+      ents.push(["0", "POLYLINE", "8", layer, "66", "1", "10", "0", "20", "0", "30", "0", "70", closed ? "1" : "0"]);
+      pts.forEach((p) => ents.push(["0", "VERTEX", "8", layer, "10", p[0].toFixed(4), "20", p[1].toFixed(4), "30", "0"]));
+      ents.push(["0", "SEQEND", "8", layer]);
+    };
+    const circle = (x, y, r, layer) => ents.push(["0", "CIRCLE", "8", layer, "10", x.toFixed(4), "20", y.toFixed(4), "30", "0", "40", r.toFixed(4)]);
+    const text = (s, x, y, h, layer) => String(s).split("\n").forEach((line, i, arr) => {
+      const yy = y + ((arr.length - 1) / 2 - i) * h * 1.4;
+      ents.push(["0", "TEXT", "8", layer, "10", x.toFixed(4), "20", yy.toFixed(4), "30", "0", "40", h.toFixed(3), "1", line.replace(/[^\x20-\x7e]/g, ""), "72", "1", "73", "2", "11", x.toFixed(4), "21", yy.toFixed(4), "31", "0"]);
+    });
+    poly(M.boundary, lay("boundary"));
+    M.zones.forEach((z) => { poly(z.poly, lay(z.type)); if (z.label) { const p = z.labelAt || labelPoint(z.poly); text(z.label, p[0], p[1], 0.35, lay("label")); } });
+    M.lines.forEach((l) => {
+      if (l.type === "stepping_stones") { for (const [x, y] of along(l.pts, l.spacing, l.t / 2)) circle(x, y, l.t / 2, lay(l.type)); }
+      else poly(band(l.pts, Math.max(l.t, 0.05)), lay(l.type));
+    });
+    M.buildings.forEach((b) => { poly(b.poly, lay("building")); if (b.label) { const p = b.labelAt || labelPoint(b.poly); text(b.label, p[0], p[1], 0.4, lay("label")); } });
+    M.structures.forEach((s) => { poly(s.poly, lay("structure")); if (s.label) { const p = s.labelAt || labelPoint(s.poly); text(s.label, p[0], p[1], 0.35, lay("label")); } });
+    M.trees.forEach((t) => { circle(t.x, t.y, t.r, lay("tree")); circle(t.x, t.y, 0.15, lay("tree")); });
+    M.shrubs.forEach((s) => circle(s.x, s.y, s.r, lay("shrub")));
+    M.features.forEach((f) => { circle(f.x, f.y, Math.max(0.2, Math.min(f.size, 2.5) / 2), lay("feature")); if (f.label) { const p = f.labelAt || [f.x + 1, f.y + 0.5]; text(f.label, p[0], p[1], 0.3, lay("label")); } });
+    M.labels.forEach((l) => text(l.text, l.at[0], l.at[1], 0.35, lay("label")));
+    // header
+    P(0, "SECTION"); P(2, "HEADER"); P(9, "$ACADVER"); P(1, "AC1009"); P(9, "$INSBASE"); P(10, 0); P(20, 0); P(30, 0);
+    P(9, "$EXTMIN"); P(10, M.ext.x0.toFixed(3)); P(20, M.ext.y0.toFixed(3)); P(30, 0);
+    P(9, "$EXTMAX"); P(10, M.ext.x1.toFixed(3)); P(20, M.ext.y1.toFixed(3)); P(30, 0);
+    P(9, "$LUNITS"); P(70, 2); P(9, "$LUPREC"); P(70, 3); P(0, "ENDSEC");
+    P(0, "SECTION"); P(2, "TABLES");
+    P(0, "TABLE"); P(2, "LTYPE"); P(70, 1); P(0, "LTYPE"); P(2, "CONTINUOUS"); P(70, 0); P(3, "Solid line"); P(72, 65); P(73, 0); P(40, 0.0); P(0, "ENDTAB");
+    P(0, "TABLE"); P(2, "LAYER"); P(70, layers.size + 1);
+    P(0, "LAYER"); P(2, "0"); P(70, 0); P(62, 7); P(6, "CONTINUOUS");
+    layers.forEach((col, name) => { P(0, "LAYER"); P(2, name); P(70, 0); P(62, col); P(6, "CONTINUOUS"); });
+    P(0, "ENDTAB"); P(0, "ENDSEC");
+    P(0, "SECTION"); P(2, "ENTITIES");
+    ents.forEach((kv) => { for (let i = 0; i < kv.length; i += 2) P(kv[i], kv[i + 1]); });
+    P(0, "ENDSEC"); P(0, "EOF");
+    return out.join("\r\n") + "\r\n";
+  };
+
+  GC.slug = function (M) { return (String(M.project.name || "garden-concept").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "garden-concept"); };
+
+  root.GC = GC;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script id="gc-plan">
+/* Garden Concept Converter - coloured concept plan (canvas), in the style of a SketchUp top view. */
+(function (root) {
+  "use strict";
+  const GC = root.GC, C = GC.colours, U = GC.util;
+
+  function shade(hex, k) {
+    const h = hex.replace("#", "");
+    const c = [0, 2, 4].map((i) => Math.max(0, Math.min(255, Math.round(parseInt(h.slice(i, i + 2), 16) * k))));
+    return `rgb(${c[0]},${c[1]},${c[2]})`;
+  }
+
+  /** Lay out the plan: returns {W, H, s, x0, y1, pad} for a given pixels-per-metre. */
+  GC.planFrame = function (M, s, padM = 1.6) {
+    const x0 = M.ext.x0 - padM, x1 = M.ext.x1 + padM, y0 = M.ext.y0 - padM - 1.8, y1 = M.ext.y1 + padM;
+    return { s, x0, y1, W: Math.round((x1 - x0) * s), H: Math.round((y1 - y0) * s), widthM: x1 - x0, heightM: y1 - y0 };
+  };
+
+  GC.drawPlan = function (ctx, M, F) {
+    const s = F.s;
+    const X = (x) => (x - F.x0) * s, Y = (y) => (F.y1 - y) * s;
+    const lw = (m) => Math.max(0.6, m * s);
+    const path = (poly) => { ctx.beginPath(); poly.forEach((p, i) => (i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])))); ctx.closePath(); };
+    const fillPoly = (poly, fill, stroke = "#141414", w = 0.04) => { path(poly); ctx.fillStyle = fill; ctx.fill(); if (stroke) { ctx.lineWidth = lw(w); ctx.strokeStyle = stroke; ctx.lineJoin = "round"; ctx.stroke(); } };
+    const rnd0 = U.mulberry(7);
+
+    // background
+    ctx.fillStyle = C.sage; ctx.fillRect(0, 0, F.W, F.H);
+    // site ground
+    fillPoly(M.boundary, GC.ZONES[M.ground].colour, "#141414", 0.05);
+    if (M.ground === "lawn") grass(M.boundary, 0, 0.28);
+
+    function grass(poly, idx, density) {
+      ctx.save(); path(poly); ctx.clip();
+      const xs = poly.map((q) => q[0]), ys = poly.map((q) => q[1]);
+      const area = Math.abs(U.area(poly)), n = Math.round(area * density), r = U.mulberry(1000 + idx);
+      ctx.strokeStyle = "rgba(20,24,14,0.85)"; ctx.lineWidth = lw(0.035); ctx.lineCap = "round";
+      for (let i = 0; i < n; i++) {
+        const x = Math.min(...xs) + r() * (Math.max(...xs) - Math.min(...xs)), y = Math.min(...ys) + r() * (Math.max(...ys) - Math.min(...ys));
+        if (!U.inPoly([x, y], poly)) continue;
+        const L = 0.35 + r() * 0.25;
+        ctx.beginPath(); ctx.moveTo(X(x), Y(y)); ctx.lineTo(X(x + L), Y(y + L * 0.35)); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    function speckle(poly, idx, col, density, size) {
+      ctx.save(); path(poly); ctx.clip();
+      const xs = poly.map((q) => q[0]), ys = poly.map((q) => q[1]);
+      const n = Math.min(6000, Math.round(Math.abs(U.area(poly)) * density)), r = U.mulberry(2000 + idx);
+      ctx.fillStyle = col;
+      for (let i = 0; i < n; i++) {
+        const x = Math.min(...xs) + r() * (Math.max(...xs) - Math.min(...xs)), y = Math.min(...ys) + r() * (Math.max(...ys) - Math.min(...ys));
+        ctx.fillRect(X(x), Y(y), Math.max(1, size * s), Math.max(1, size * s));
+      }
+      ctx.restore();
+    }
+    function hatch(poly, col, spacing, angleDeg, w) {
+      ctx.save(); path(poly); ctx.clip();
+      const xs = poly.map((q) => q[0]), ys = poly.map((q) => q[1]);
+      const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+      const R = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2 + 1;
+      const a = (angleDeg * Math.PI) / 180, ux = Math.cos(a), uy = Math.sin(a), vx = -uy, vy = ux;
+      ctx.strokeStyle = col; ctx.lineWidth = lw(w);
+      for (let t = -R; t <= R; t += spacing) {
+        ctx.beginPath(); ctx.moveTo(X(cx + vx * t - ux * R), Y(cy + vy * t - uy * R)); ctx.lineTo(X(cx + vx * t + ux * R), Y(cy + vy * t + uy * R)); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // zones
+    M.zones.forEach((z, i) => {
+      const info = GC.ZONES[z.type];
+      fillPoly(z.poly, info.colour, "#141414", 0.04);
+      switch (z.type) {
+        case "lawn": grass(z.poly, i + 1, 0.3); break;
+        case "meadow": grass(z.poly, i + 1, 0.7); break;
+        case "gravel": case "hoggin": speckle(z.poly, i, "rgba(40,30,20,0.35)", 60, 0.045); break;
+        case "resin_bound": speckle(z.poly, i, "rgba(90,85,75,0.28)", 45, 0.04); break;
+        case "bark": speckle(z.poly, i, "rgba(30,20,10,0.4)", 40, 0.07); break;
+        case "paving": hatch(z.poly, "rgba(0,0,0,0.08)", 0.6, 0, 0.015); hatch(z.poly, "rgba(0,0,0,0.08)", 0.9, 90, 0.015); break;
+        case "sandstone": hatch(z.poly, "rgba(80,60,30,0.16)", 0.6, 0, 0.015); hatch(z.poly, "rgba(80,60,30,0.16)", 0.6, 90, 0.015); break;
+        case "decking": hatch(z.poly, "rgba(60,35,15,0.35)", 0.15, 0, 0.012); break;
+        case "water": case "pool": {
+          ctx.save(); path(z.poly); ctx.clip();
+          const r = U.mulberry(3000 + i); const xs = z.poly.map((q) => q[0]), ys = z.poly.map((q) => q[1]);
+          ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = lw(0.03);
+          for (let k = 0; k < Math.abs(U.area(z.poly)) * 1.2; k++) {
+            const x = Math.min(...xs) + r() * (Math.max(...xs) - Math.min(...xs)), y = Math.min(...ys) + r() * (Math.max(...ys) - Math.min(...ys));
+            ctx.beginPath(); ctx.arc(X(x), Y(y), 0.35 * s, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+          }
+          ctx.restore();
+          fillPoly(z.poly, "rgba(0,0,0,0)", "#f5f5f0", 0.12); fillPoly(z.poly, "rgba(0,0,0,0)", "#141414", 0.035);
+          break;
+        }
+        case "raised_bed": case "veg_bed": {
+          const inset = insetPoly(z.poly, 0.1);
+          path(inset); ctx.fillStyle = info.top; ctx.fill();
+          if (z.type === "veg_bed") speckle(inset, i, "rgba(150,190,90,0.6)", 80, 0.06);
+          fillPoly(inset, "rgba(0,0,0,0)", "rgba(0,0,0,0.45)", 0.015);
+          fillPoly(z.poly, "rgba(0,0,0,0)", "#141414", 0.035);
+          break;
+        }
+      }
+    });
+
+    function insetPoly(poly, d) {
+      const c = U.centroid(poly);
+      const n = poly.length, out = [];
+      for (let i = 0; i < n; i++) {
+        const a = poly[(i + n - 1) % n], b = poly[i], cc = poly[(i + 1) % n];
+        const n1 = norm([-(b[1] - a[1]), b[0] - a[0]]), n2 = norm([-(cc[1] - b[1]), cc[0] - b[0]]);
+        let m = norm([n1[0] + n2[0], n1[1] + n2[1]]);
+        const cos = m[0] * n1[0] + m[1] * n1[1];
+        const k = d / Math.max(0.3, cos);
+        out.push([b[0] + m[0] * k, b[1] + m[1] * k]);
+      }
+      return out;
+      function norm(v) { const L = Math.hypot(v[0], v[1]) || 1; return [v[0] / L, v[1] / L]; }
+    }
+
+    // lines
+    M.lines.forEach((l) => {
+      const col = GC.LINES[l.type].colour;
+      if (l.type === "fence" || l.type === "trellis" || l.type === "edging") {
+        ctx.strokeStyle = l.type === "edging" ? "#2c2c2c" : shade(col, 0.8); ctx.lineWidth = lw(l.type === "edging" ? 0.05 : 0.07); ctx.lineCap = "butt";
+        ctx.beginPath(); l.pts.forEach((p, i) => (i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])))); ctx.stroke();
+        if (l.type !== "edging") for (const [x, y] of U.along(l.pts, 1.8, 0)) { ctx.fillStyle = shade(col, 0.6); ctx.fillRect(X(x) - 0.06 * s, Y(y) - 0.06 * s, 0.12 * s, 0.12 * s); }
+      } else if (l.type === "hedge") {
+        const poly = U.band(l.pts, l.t);
+        fillPoly(poly, "#557a3f", "#1f2d15", 0.03);
+        const r = U.mulberry(Math.round(l.pts[0][0] * 31 + l.pts[0][1] * 17));
+        for (const [x, y] of U.along(l.pts, 0.35, 0.15)) {
+          ctx.beginPath(); ctx.arc(X(x + (r() - 0.5) * 0.15), Y(y + (r() - 0.5) * 0.15), l.t * 0.42 * s, 0, 6.283);
+          ctx.fillStyle = r() < 0.5 ? "#6a8c4c" : "#4f6e3a"; ctx.fill(); ctx.strokeStyle = "rgba(20,30,12,0.6)"; ctx.lineWidth = lw(0.015); ctx.stroke();
+        }
+      } else if (l.type === "stepping_stones") {
+        const r = U.mulberry(l.seed);
+        for (const [x, y, a] of U.along(l.pts, l.spacing, l.t / 2)) {
+          const st = []; for (let k = 0; k < 9; k++) { const tt = (k / 9) * 6.283; const rr = (l.t / 2) * (0.85 + r() * 0.2); st.push([x + rr * Math.cos(tt + a), y + rr * 0.75 * Math.sin(tt + a)]); }
+          fillPoly(st, "#cfcac0", "#141414", 0.02);
+        }
+      } else if (l.type === "screen") {
+        const poly = U.band(l.pts, Math.max(l.t, 0.12));
+        fillPoly(poly, col, "#141414", 0.025);
+        ctx.strokeStyle = "rgba(255,230,200,0.35)"; ctx.lineWidth = lw(0.012);
+        for (const [x, y, a] of U.along(l.pts, 0.16, 0.08)) {
+          const nx = -Math.sin(a) * 0.06, ny = Math.cos(a) * 0.06;
+          ctx.beginPath(); ctx.moveTo(X(x - nx), Y(y - ny)); ctx.lineTo(X(x + nx), Y(y + ny)); ctx.stroke();
+        }
+      } else {
+        fillPoly(U.band(l.pts, l.t), l.type === "retaining_wall" ? "#a9a49b" : "#bdb8ae", "#141414", 0.03);
+      }
+    });
+
+    // buildings - roof plans
+    const sun = [-0.55, 0.6];
+    M.buildings.forEach((b) => {
+      const R = b.sh.R;
+      if (b.roof !== "flat" && b.sh.kind === "rect") {
+        const over = 0.3, w = R.w + 2 * over, d = R.d + 2 * over, c = Math.cos(R.ang), sn = Math.sin(R.ang);
+        const W = (u, v) => [R.cx + u * c - v * sn, R.cy + u * sn + v * c];
+        const facets = [];
+        if (b.roof === "gable") {
+          let ww = w, dd = d, rot = false; if ((b.ridge !== "short" && dd > ww) || (b.ridge === "short" && ww > dd)) { rot = true; }
+          const P = rot ? (u, v) => W(v, u) : W; const A = rot ? dd : ww, B = rot ? ww : dd;
+          facets.push([[P(-A / 2, -B / 2), P(A / 2, -B / 2), P(A / 2, 0), P(-A / 2, 0)], rot ? [-1, 0] : [0, -1]]);
+          facets.push([[P(-A / 2, 0), P(A / 2, 0), P(A / 2, B / 2), P(-A / 2, B / 2)], rot ? [1, 0] : [0, 1]]);
+        } else if (w >= d) {
+          const r0 = W(-w / 2 + d / 2, 0), r1 = W(w / 2 - d / 2, 0);
+          facets.push([[W(-w / 2, -d / 2), W(w / 2, -d / 2), r1, r0], [0, -1]], [[W(w / 2, d / 2), W(-w / 2, d / 2), r0, r1], [0, 1]], [[W(w / 2, -d / 2), W(w / 2, d / 2), r1], [1, 0]], [[W(-w / 2, d / 2), W(-w / 2, -d / 2), r0], [-1, 0]]);
+        } else {
+          const r0 = W(0, -d / 2 + w / 2), r1 = W(0, d / 2 - w / 2);
+          facets.push([[W(w / 2, -d / 2), W(w / 2, d / 2), r1, r0], [1, 0]], [[W(-w / 2, d / 2), W(-w / 2, -d / 2), r0, r1], [-1, 0]], [[W(-w / 2, -d / 2), W(w / 2, -d / 2), r0], [0, -1]], [[W(w / 2, d / 2), W(-w / 2, d / 2), r1], [0, 1]]);
+        }
+        facets.forEach(([poly, n]) => {
+          const nn = [n[0] * c - n[1] * sn, n[0] * sn + n[1] * c];
+          const k = 0.85 + 0.17 * (nn[0] * sun[0] + nn[1] * sun[1]);
+          fillPoly(poly, shade(C.roof, k), "#141414", 0.03);
+        });
+      } else {
+        fillPoly(b.poly, C.roofFlat, "#141414", 0.04);
+      }
+    });
+
+    // structures
+    M.structures.forEach((st) => {
+      const t = st.type;
+      if (t === "pergola") {
+        const drawBeam = (a, b, w) => { const pl = U.band([a, b], w); fillPoly(pl, "#f7f7f4", "#141414", 0.018); };
+        if (st.sh.kind === "arc") {
+          const { cx, cy, r1, r2, a0, a1 } = st.sh, rin = Math.min(r1, r2), rout = Math.max(r1, r2), span = Math.abs(a1 - a0);
+          const nr = Math.max(6, Math.round(((span / 360) * 2 * Math.PI * (rin + rout) / 2) / 0.55));
+          for (const rr of [rin + 0.15, rout - 0.15]) {
+            const seg = 40, pts = [];
+            for (let k = 0; k <= seg; k++) { const a = ((a0 + ((a1 - a0) * k) / seg) * Math.PI) / 180; pts.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]); }
+            fillPoly(U.band(pts, 0.14).map((q) => q), "#f7f7f4", "#141414", 0.018);
+          }
+          for (let k = 0; k < nr; k++) { const a = ((a0 + ((a1 - a0) * (k + 0.5)) / nr) * Math.PI) / 180; drawBeam([cx + (rin - 0.25) * Math.cos(a), cy + (rin - 0.25) * Math.sin(a)], [cx + (rout + 0.25) * Math.cos(a), cy + (rout + 0.25) * Math.sin(a)], 0.08); }
+        } else {
+          const R = st.sh.R; let w = R.w, d = R.d, ang = R.ang; if (d > w) { w = R.d; d = R.w; ang += Math.PI / 2; }
+          const c = Math.cos(ang), sn = Math.sin(ang), P = (u, v) => [R.cx + u * c - v * sn, R.cy + u * sn + v * c];
+          for (const v of [-d / 2 + 0.1, d / 2 - 0.1]) drawBeam(P(-w / 2 - 0.2, v), P(w / 2 + 0.2, v), 0.15);
+          const nr = Math.max(3, Math.round(w / 0.5)); for (let k = 0; k <= nr; k++) { const u = -w / 2 + (w * k) / nr; drawBeam(P(u, -d / 2 - 0.25), P(u, d / 2 + 0.25), 0.08); }
+        }
+      } else if (t === "gazebo") {
+        const { cx, cy, r } = st.sh; const hex = U.circlePts(cx, cy, r + 0.3, 6);
+        for (let k = 0; k < 6; k++) { const a = hex[k], b = hex[(k + 1) % 6]; const n = [((a[0] + b[0]) / 2 - cx), ((a[1] + b[1]) / 2 - cy)]; const L = Math.hypot(...n); fillPoly([[cx, cy], a, b], shade(C.roof, 0.85 + 0.17 * ((n[0] / L) * sun[0] + (n[1] / L) * sun[1])), "#141414", 0.025); }
+      } else if (t === "carport" || t === "garden_room") {
+        fillPoly(st.poly, C.roofFlat, "#141414", 0.035);
+      } else {
+        const R = st.sh.R; let w = R.w, d = R.d, ang = R.ang; if (d > w) { w = R.d; d = R.w; ang += Math.PI / 2; }
+        const c = Math.cos(ang), sn = Math.sin(ang), P = (u, v) => [R.cx + u * c - v * sn, R.cy + u * sn + v * c];
+        const base = t === "greenhouse" ? "#e3ecf1" : t === "shed" ? "#8c6a4f" : "#9aa5b1";
+        fillPoly([P(-w / 2, -d / 2), P(w / 2, -d / 2), P(w / 2, 0), P(-w / 2, 0)], shade(base, 0.95), "#141414", 0.03);
+        fillPoly([P(-w / 2, 0), P(w / 2, 0), P(w / 2, d / 2), P(-w / 2, d / 2)], shade(base, 1.08), "#141414", 0.03);
+      }
+    });
+
+    // features
+    M.features.forEach((f) => {
+      const { x, y, size: S, rot: a } = f;
+      const c = Math.cos(a), sn = Math.sin(a), P = (u, v) => [x + u * c - v * sn, y + u * sn + v * c];
+      const rect = (u0, v0, w, d, col) => fillPoly([P(u0 - w / 2, v0 - d / 2), P(u0 + w / 2, v0 - d / 2), P(u0 + w / 2, v0 + d / 2), P(u0 - w / 2, v0 + d / 2)], col, "#141414", 0.02);
+      const circ = (r, col, stroke = "#141414") => { ctx.beginPath(); ctx.arc(X(x), Y(y), r * s, 0, 6.283); ctx.fillStyle = col; ctx.fill(); if (stroke) { ctx.lineWidth = lw(0.025); ctx.strokeStyle = stroke; ctx.stroke(); } };
+      switch (f.type) {
+        case "firebowl": circ(S / 2, "#3a3a3a"); circ(S * 0.35, C.fire, null); break;
+        case "dining_table": rect(0, -0.8, S * 0.9, 0.35, "#6b4429"); rect(0, 0.8, S * 0.9, 0.35, "#6b4429"); rect(0, 0, S, 0.9, "#7a4e2f"); break;
+        case "bench": rect(0, 0, S, 0.45, "#7a4e2f"); break;
+        case "pot": circ(S / 2, "#8b6a52"); circ(S * 0.38, "#6a8c4c", null); break;
+        case "water_feature": circ(S / 2, C.stone); circ(S * 0.35, C.water, null); break;
+        case "sculpture": rect(0, 0, S, S, "#8c8c88"); break;
+        case "boulder": { const r = U.mulberry(Math.round(x * 13 + y * 7)); const p = []; for (let k = 0; k < 9; k++) { const t = (k / 9) * 6.283; const rr = S / 2 * (0.8 + r() * 0.3); p.push([x + rr * Math.cos(t), y + rr * 0.8 * Math.sin(t)]); } fillPoly(p, C.stone, "#141414", 0.025); break; }
+        case "car": rect(0, 0, S, 1.8, C.car); rect(-S * 0.05, 0, S * 0.45, 1.5, "#9fb8d0"); break;
+        case "person": circ(0.2, C.person); break;
+        case "lounger": rect(0, 0, S, 0.65, "#f4f4f2"); break;
+        case "hot_tub": rect(0, 0, S, S, "#7a4e2f"); rect(0, 0, S * 0.8, S * 0.8, C.water); break;
+        case "bin_store": rect(0, 0, S, 0.9, "#7a4e2f"); break;
+      }
+    });
+
+    // planting: shrubs then trees
+    M.shrubs.forEach((p) => {
+      const pal = GC.SHRUBS[p.tone % GC.SHRUBS.length];
+      const r = U.mulberry(p.seed), pts = [];
+      for (let k = 0; k < 16; k++) { const t = (k / 16) * 6.283; const rr = p.r * (0.9 + r() * 0.18); pts.push([p.x + rr * Math.cos(t), p.y + rr * Math.sin(t)]); }
+      fillPoly(pts, pal[1], "#1e2a15", 0.018);
+      ctx.beginPath(); ctx.arc(X(p.x - p.r * 0.25), Y(p.y + p.r * 0.25), p.r * 0.38 * s, 0, 6.283); ctx.fillStyle = shade(pal[0].replace("#", "#"), 1.0); ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+    });
+    M.trees.forEach((t) => {
+      const pal = GC.GREENS[t.seed % GC.GREENS.length], r = U.mulberry(t.seed);
+      const n = t.form === "airy" ? 18 : 13;
+      for (let k = 0; k < n; k++) {
+        const a = r() * 6.283, rr = t.r * Math.sqrt(r()) * 0.72;
+        ctx.beginPath(); ctx.arc(X(t.x + rr * Math.cos(a)), Y(t.y + rr * Math.sin(a)), t.r * (0.28 + r() * 0.14) * s, 0, 6.283);
+        ctx.globalAlpha = t.form === "airy" ? 0.62 : 0.78; ctx.fillStyle = pal[Math.floor(r() * 3)]; ctx.fill();
+        ctx.globalAlpha = 1; ctx.strokeStyle = "rgba(30,45,25,0.6)"; ctx.lineWidth = lw(0.012); ctx.stroke();
+      }
+    });
+
+    // labels
+    const fontPx = Math.max(9, 0.42 * s);
+    const text = (str, x, y, size = fontPx, weight = 700, colour = "#111") => {
+      ctx.font = `${weight} ${size}px "Josefin Sans", "Gill Sans", "Trebuchet MS", sans-serif`;
+      ctx.fillStyle = colour; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const lines = String(str).split("\n");
+      lines.forEach((ln, i) => ctx.fillText(ln, X(x), Y(y) + (i - (lines.length - 1) / 2) * size * 1.15));
+    };
+    const callout = (str, at, ptr) => {
+      const size = fontPx * 0.92; ctx.font = `700 ${size}px "Josefin Sans", "Gill Sans", "Trebuchet MS", sans-serif`;
+      const lines = String(str).split("\n"); const w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + size * 1.2, h = lines.length * size * 1.15 + size * 0.9;
+      const bx = X(at[0]) - w / 2, by = Y(at[1]) - h / 2;
+      if (ptr) {
+        const px = X(ptr[0]), py = Y(ptr[1]), cx = X(at[0]), cy = Y(at[1]);
+        const dx = px - cx, dy = py - cy, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, half = size * 0.45;
+        ctx.beginPath(); ctx.moveTo(cx + nx * half, cy + ny * half); ctx.lineTo(px, py); ctx.lineTo(cx - nx * half, cy - ny * half); ctx.closePath();
+        ctx.fillStyle = "#ebebe6"; ctx.fill(); ctx.strokeStyle = "#8a8a84"; ctx.lineWidth = 1; ctx.stroke();
+      }
+      ctx.beginPath(); const rr = size * 0.3;
+      ctx.moveTo(bx + rr, by); ctx.arcTo(bx + w, by, bx + w, by + h, rr); ctx.arcTo(bx + w, by + h, bx, by + h, rr); ctx.arcTo(bx, by + h, bx, by, rr); ctx.arcTo(bx, by, bx + w, by, rr); ctx.closePath();
+      ctx.fillStyle = "#ebebe6"; ctx.fill(); ctx.strokeStyle = "#8a8a84"; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = "#4a4a46"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      lines.forEach((ln, i) => ctx.fillText(ln, X(at[0]), Y(at[1]) + (i - (lines.length - 1) / 2) * size * 1.15));
+    };
+    if (M.groundLabel) { const p = M.groundLabelAt || U.labelPoint(M.boundary); text(M.groundLabel, p[0], p[1]); }
+    M.zones.forEach((z) => { if (z.label) { const p = z.labelAt || U.labelPoint(z.poly); text(z.label, p[0], p[1]); } });
+    M.buildings.forEach((b) => { if (b.label) { const p = b.labelAt || U.labelPoint(b.poly); callout(b.label, p, null); } });
+    M.structures.forEach((st) => { if (st.label) { const p = st.labelAt || U.labelPoint(st.poly); callout(st.label, p, null); } });
+    M.lines.forEach((l) => { if (l.label && l.labelAt) callout(l.label, l.labelAt, null); });
+    M.features.forEach((f) => { if (f.label) callout(f.label, f.labelAt || [f.x + 1.6, f.y - 1.6], [f.x, f.y]); });
+    M.labels.forEach((l) => (l.boxed ? callout(l.text, l.at, l.pointer) : text(l.text, l.at[0], l.at[1])));
+
+    // north arrow + scale bar (bottom left, outside the site)
+    const bx = F.x0 + 1.0, byM = F.y1 - F.heightM + 1.2;
+    const barM = F.widthM > 30 ? 10 : 5;
+    ctx.fillStyle = "#222"; ctx.strokeStyle = "#222"; ctx.lineWidth = 1;
+    for (let k = 0; k < barM; k++) { ctx.fillStyle = k % 2 ? "#f4f4ef" : "#222"; ctx.fillRect(X(bx + k), Y(byM) - 0.14 * s, s, 0.28 * s); ctx.strokeRect(X(bx + k), Y(byM) - 0.14 * s, s, 0.28 * s); }
+    const small = Math.max(9, 0.32 * s);
+    ctx.font = `600 ${small}px "Josefin Sans", "Gill Sans", sans-serif`; ctx.fillStyle = "#222"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText("0", X(bx), Y(byM) + 0.25 * s); ctx.fillText(`${barM} m`, X(bx + barM), Y(byM) + 0.25 * s);
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillText(`Plan is ${F.widthM.toFixed(1)} m wide`, X(bx + barM + 1.2), Y(byM));
+    // north arrow
+    const nx = F.x0 + F.widthM - 1.6, ny = byM + 0.4, a = (-(M.north || 0) * Math.PI) / 180, L = 0.9;
+    const pt = (u, v) => [X(nx + u * Math.cos(a) - v * Math.sin(a)), Y(ny + u * Math.sin(a) + v * Math.cos(a))];
+    ctx.beginPath(); let p = pt(0, L); ctx.moveTo(p[0], p[1]); p = pt(-0.4, -L * 0.6); ctx.lineTo(p[0], p[1]); p = pt(0, -L * 0.25); ctx.lineTo(p[0], p[1]); ctx.closePath(); ctx.fillStyle = "#222"; ctx.fill();
+    ctx.beginPath(); p = pt(0, L); ctx.moveTo(p[0], p[1]); p = pt(0.4, -L * 0.6); ctx.lineTo(p[0], p[1]); p = pt(0, -L * 0.25); ctx.lineTo(p[0], p[1]); ctx.closePath(); ctx.fillStyle = "#f4f4ef"; ctx.fill(); ctx.stroke();
+    p = pt(0, L + 0.45); ctx.font = `700 ${small * 1.1}px "Josefin Sans", sans-serif`; ctx.fillStyle = "#222"; ctx.textAlign = "center"; ctx.fillText("N", p[0], p[1]);
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script id="gc-app">
+/* Garden Concept Converter - page behaviour: paste, check, preview (plan + 3D), download. */
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const ta = $("layout"), statusEl = $("status"), planCanvas = $("plan"), threeHost = $("three");
+  let current = null; // {M, objs}
+  let downloadsCap = null;
+  const inViewer = !!(window.claude && window.claude.use);
+
+  // ---------- status
+  function setStatus(kind, title, items) {
+    statusEl.className = "status " + kind;
+    statusEl.innerHTML = "";
+    const h = document.createElement("p"); h.className = "status-title"; h.textContent = title; statusEl.appendChild(h);
+    if (items && items.length) {
+      const ul = document.createElement("ul");
+      items.forEach((t) => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+      statusEl.appendChild(ul);
+    }
+  }
+
+  // ---------- run
+  function run() {
+    const text = ta.value;
+    try { localStorage.setItem("gc-layout", text); } catch (e) { /* storage unavailable */ }
+    if (!text.trim()) { setStatus("idle", "Paste the layout block from the Gem, or load the example."); setDownloads(false); return; }
+    const p = GC.parse(text);
+    if (p.error) { setStatus("bad", "This layout can't be read yet.", [p.error]); setDownloads(false); return; }
+    const n = GC.normalise(p.layout);
+    if (!n.model) { setStatus("bad", "This layout can't be drawn yet. Paste this note into the Gem and ask it to fix the layout:", n.errors); setDownloads(false); return; }
+    const M = n.model;
+    const objs = GC.build3D(M);
+    current = { M, objs };
+    const bx = M.boundary.map((q) => q[0]), by = M.boundary.map((q) => q[1]);
+    const w = (Math.max(...bx) - Math.min(...bx)).toFixed(1), d = (Math.max(...by) - Math.min(...by)).toFixed(1);
+    if (n.errors.length) setStatus("warn", `Drawn, but ${n.errors.length} item${n.errors.length > 1 ? "s were" : " was"} left out. Paste these notes into the Gem and ask it to fix them:`, n.errors.concat(n.warnings));
+    else setStatus(n.warnings.length ? "warn" : "ok", `${M.project.name || "Layout"} is ready: the plot is about ${w} × ${d} m.`, n.warnings);
+    $("project-name").textContent = M.project.name || "Untitled layout";
+    $("project-meta").textContent = [M.project.client, M.project.ref].filter(Boolean).join(" · ");
+    drawPreview();
+    if (viewer) viewer.load(objs, M);
+    setDownloads(true);
+  }
+
+  function drawPreview() {
+    if (!current) return;
+    const M = current.M;
+    const host = planCanvas.parentElement;
+    const availW = host.clientWidth || 600;
+    const F0 = GC.planFrame(M, 1);
+    const maxH = Math.max(320, window.innerHeight * 0.72);
+    const s = Math.max(4, Math.min(availW / F0.widthM, maxH / F0.heightM));
+    const F = GC.planFrame(M, s);
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    planCanvas.width = Math.round(F.W * dpr); planCanvas.height = Math.round(F.H * dpr);
+    planCanvas.style.width = F.W + "px"; planCanvas.style.height = F.H + "px";
+    const ctx = planCanvas.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    GC.drawPlan(ctx, M, F);
+  }
+
+  // ---------- files
+  function planPNG() {
+    const M = current.M, F = GC.planFrame(M, 50);
+    const c = document.createElement("canvas"); c.width = F.W; c.height = F.H;
+    GC.drawPlan(c.getContext("2d"), M, F);
+    return new Promise((res) => c.toBlob((b) => res({ blob: b, widthM: F.widthM }), "image/png"));
+  }
+  function names() {
+    const slug = GC.slug(current.M);
+    return { dae: `${slug}_3d-model.dae`, dxf: `${slug}_base-plan.dxf`, png: (w) => `${slug}_plan_${w.toFixed(1)}m-wide.png`, zip: `${slug}_sketchup-files.zip` };
+  }
+  async function offer(filename, data, mime) {
+    if (downloadsCap) {
+      try { await downloadsCap.save({ filename, data }); toast(`Saved ${filename}`); }
+      catch (e) { if (e && e.code !== "declined") toast(`Couldn't save: ${e.message || e.code}`); }
+      return;
+    }
+    const blob = data instanceof Blob ? data : new Blob([data], { type: mime || "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    toast(`Downloaded ${filename}`);
+  }
+  async function zipAll() {
+    const n = names(), png = await planPNG();
+    const z = new JSZip();
+    z.file(n.dae, GC.toDAE(current.objs, current.M));
+    z.file(n.dxf, GC.toDXF(current.M));
+    z.file(n.png(png.widthM), png.blob);
+    z.file("READ ME - which file.txt",
+      "SketchUp on a computer (Pro or Make): File > Import > choose the .dae file (3D model).\r\n" +
+      "  Or import the .dxf as a 2D base plan; choose Meters as the units.\r\n\r\n" +
+      `Free SketchUp in a browser: import the .png plan image. Click once to place it, then type ${png.widthM.toFixed(1)}m and press Enter so it is to scale.\r\n`);
+    return z.generateAsync({ type: "blob" });
+  }
+
+  function setDownloads(on) { document.querySelectorAll("[data-dl]").forEach((b) => (b.disabled = !on)); }
+  document.querySelectorAll("[data-dl]").forEach((btn) => btn.addEventListener("click", async () => {
+    if (!current) return;
+    const kind = btn.dataset.dl, n = names();
+    btn.disabled = true;
+    try {
+      if (kind === "dae") await offer(n.dae, GC.toDAE(current.objs, current.M), "model/vnd.collada+xml");
+      if (kind === "dxf") await offer(n.dxf, GC.toDXF(current.M), "image/vnd.dxf");
+      if (kind === "png") { const p = await planPNG(); await offer(n.png(p.widthM), p.blob, "image/png"); }
+      if (kind === "zip") await offer(n.zip, await zipAll(), "application/zip");
+      if (kind === "view" && viewer) await offer(`${GC.slug(current.M)}_3d-view.png`, await viewer.snapshot(), "image/png");
+    } finally { btn.disabled = false; }
+  }));
+
+  let toastTimer;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2600); }
+
+  // ---------- tabs
+  document.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-tab]").forEach((x) => x.setAttribute("aria-selected", x === b ? "true" : "false"));
+    const tab = b.dataset.tab;
+    $("panel-plan").hidden = tab !== "plan"; $("panel-3d").hidden = tab !== "3d";
+    if (tab === "3d" && viewer) viewer.resize();
+    if (tab === "plan") drawPreview();
+  }));
+
+  // ---------- 3D viewer
+  const viewer = (function () {
+    if (!window.THREE) return null;
+    const T = window.THREE;
+    const renderer = new T.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    threeHost.appendChild(renderer.domElement);
+    const scene = new T.Scene(); scene.background = new T.Color("#b9c7d9");
+    const camera = new T.PerspectiveCamera(40, 1.5, 0.1, 2000); camera.up.set(0, 0, 1);
+    scene.add(new T.HemisphereLight(0xf4f6ff, 0x6a7055, 0.75));
+    const sun = new T.DirectionalLight(0xffffff, 0.65); sun.position.set(-30, -40, 60); scene.add(sun);
+    const ground = new T.Mesh(new T.PlaneGeometry(600, 600), new T.MeshLambertMaterial({ color: GC.colours.sage }));
+    ground.position.z = -0.02; scene.add(ground);
+    const controls = T.OrbitControls ? new T.OrbitControls(camera, renderer.domElement) : null;
+    if (controls) { controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.495; }
+    let content = null, centre = new T.Vector3(), radius = 20;
+    function load(objs, M) {
+      if (content) { scene.remove(content); content.traverse((o) => { if (o.geometry) o.geometry.dispose(); }); }
+      content = new T.Group();
+      const edgeMat = new T.LineBasicMaterial({ color: 0x151515, transparent: true, opacity: 0.55 });
+      objs.forEach((o) => {
+        Object.entries(o.parts).forEach(([colour, verts]) => {
+          const arr = new Float32Array(verts.length * 3);
+          verts.forEach((v, i) => { arr[i * 3] = v[0]; arr[i * 3 + 1] = v[1]; arr[i * 3 + 2] = v[2]; });
+          const g = new T.BufferGeometry(); g.setAttribute("position", new T.BufferAttribute(arr, 3)); g.computeVertexNormals();
+          const mesh = new T.Mesh(g, new T.MeshLambertMaterial({ color: colour, side: T.FrontSide }));
+          content.add(mesh);
+          if (o.group !== "Planting" && o.group !== "Ground" && verts.length < 60000) content.add(new T.LineSegments(new T.EdgesGeometry(g, 25), edgeMat));
+        });
+      });
+      scene.add(content);
+      centre.set((M.ext.x0 + M.ext.x1) / 2, (M.ext.y0 + M.ext.y1) / 2, 0);
+      radius = Math.hypot(M.ext.x1 - M.ext.x0, M.ext.y1 - M.ext.y0) / 2;
+      preset("front");
+      resize();
+    }
+    function preset(which) {
+      const r = radius * 2.1;
+      const dir = which === "rear" ? new T.Vector3(-0.5, 0.85, 0.8) : which === "top" ? new T.Vector3(0, -0.02, 1) : new T.Vector3(0.45, -0.75, 1.05);
+      dir.normalize();
+      camera.position.copy(centre).addScaledVector(dir, r);
+      camera.lookAt(centre); if (controls) { controls.target.copy(centre); controls.update(); }
+      render();
+    }
+    function resize() {
+      const w = threeHost.clientWidth || 600, h = Math.max(300, Math.round(w * 0.66));
+      renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); render();
+    }
+    function render() { renderer.render(scene, camera); }
+    (function loop() { requestAnimationFrame(loop); if (controls && controls.update()) render(); else if (!controls) render(); })();
+    if (controls) controls.addEventListener("change", render);
+    window.addEventListener("resize", () => { resize(); drawPreview(); });
+    function snapshot() { render(); return new Promise((res) => renderer.domElement.toBlob(res, "image/png")); }
+    document.querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => preset(b.dataset.view)));
+    return { load, resize, snapshot };
+  })();
+  if (!viewer) { threeHost.innerHTML = '<p class="muted">The 3D view needs an internet connection to load. The plan and downloads still work.</p>'; }
+
+  // ---------- inputs
+  let timer;
+  ta.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(run, 450); });
+  $("draw").addEventListener("click", run);
+  $("example").addEventListener("click", () => { ta.value = document.getElementById("example-layout").textContent.trim(); run(); });
+  $("clear").addEventListener("click", () => { ta.value = ""; current = null; run(); ta.focus(); });
+  $("paste").addEventListener("click", async () => {
+    try { const t = await navigator.clipboard.readText(); if (t) { ta.value = t; run(); return; } } catch (e) { /* not allowed here */ }
+    ta.focus(); toast("Press Ctrl+V (or ⌘V) to paste");
+  });
+
+  // ---------- start
+  let saved = null; try { saved = localStorage.getItem("gc-layout"); } catch (e) { /* ignore */ }
+  ta.value = saved && saved.trim() ? saved : document.getElementById("example-layout").textContent.trim();
+  run();
+  if (inViewer) {
+    // inside a Claude artifact: files go through the viewer's save prompt (zip and png only)
+    document.querySelectorAll('[data-dl="dae"],[data-dl="dxf"]').forEach((b) => (b.hidden = true));
+    window.claude.use("downloads").then((d) => { downloadsCap = d; if (!d) document.querySelectorAll("[data-dl]").forEach((b) => (b.hidden = true)); });
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawPreview);
+})();
+
+</script>
+
+</body>
+</html>

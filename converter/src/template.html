@@ -1,0 +1,161 @@
+<title>Garden Concept Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: a working bench - paste on the left, the drawing large on the right, downloads under the drawing. */
+:root {
+  --bg: #eef0e8;        /* pale sage paper */
+  --panel: #fbfbf7;
+  --ink: #23291f;
+  --muted: #5d6556;
+  --line: #d3d8c8;
+  --accent: #4f6a2e;    /* garden green */
+  --accent-ink: #ffffff;
+  --ok: #3f7a3a; --warn: #9a6b12; --bad: #a33a2a;
+  --display: "Josefin Sans", "Gill Sans", "Trebuchet MS", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #181b16; --panel: #21251e; --ink: #e6e9de; --muted: #a3ab98; --line: #353b30;
+  --accent: #a3c06a; --accent-ink: #18200f; --ok: #8cc47f; --warn: #e2b55a; --bad: #ef8a76; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #181b16; --panel: #21251e; --ink: #e6e9de; --muted: #a3ab98; --line: #353b30;
+  --accent: #a3c06a; --accent-ink: #18200f; --ok: #8cc47f; --warn: #e2b55a; --bad: #ef8a76; color-scheme: dark; }
+
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body); }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 20px 48px; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; padding-bottom: 14px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+h1 { font: 700 1.35rem/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; margin: 0; text-wrap: balance; }
+.tagline { color: var(--muted); margin: 0; max-width: 60ch; }
+.grid { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.step { font: 600 0.78rem/1 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+h2 { font: 600 1.05rem/1.3 var(--body); margin: 0 0 10px; }
+textarea { width: 100%; min-height: 260px; resize: vertical; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); color: var(--ink); font: 12.5px/1.45 var(--mono); }
+textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+button { font: 600 0.95rem/1 var(--body); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+.status { margin-top: 14px; border-radius: 8px; padding: 10px 12px; border: 1px solid var(--line); font-size: 0.95rem; }
+.status-title { margin: 0; font-weight: 600; }
+.status ul { margin: 6px 0 0; padding-left: 18px; }
+.status.ok { border-color: color-mix(in srgb, var(--ok) 50%, var(--line)); }
+.status.ok .status-title { color: var(--ok); }
+.status.warn { border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); }
+.status.warn .status-title { color: var(--warn); }
+.status.bad { border-color: color-mix(in srgb, var(--bad) 55%, var(--line)); }
+.status.bad .status-title { color: var(--bad); }
+.status.idle .status-title { color: var(--muted); font-weight: 400; }
+.how { margin-top: 16px; color: var(--muted); font-size: 0.92rem; }
+.how ol { padding-left: 18px; margin: 6px 0 0; display: grid; gap: 4px; }
+.drawing-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.proj-name { font: 700 1.1rem/1.2 var(--display); letter-spacing: 0.08em; text-transform: uppercase; margin: 0; }
+.proj-meta { color: var(--muted); margin: 2px 0 0; font-size: 0.9rem; }
+.tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.tabs button { border: 0; border-radius: 0; padding: 8px 14px; background: transparent; }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.canvas-host { overflow: auto; border-radius: 8px; border: 1px solid var(--line); background: #b9c1a2; max-width: 100%; }
+#plan { display: block; margin: 0 auto; max-width: none; }
+#three { border-radius: 8px; overflow: hidden; border: 1px solid var(--line); min-height: 300px; }
+#three canvas { display: block; width: 100%; }
+.view-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+.view-row .label { color: var(--muted); font-size: 0.9rem; margin-right: 4px; }
+.view-row button { padding: 7px 11px; font-size: 0.88rem; }
+.downloads { margin-top: 18px; display: grid; gap: 10px; }
+.dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.dl-grid button { text-align: left; padding: 12px 14px; display: grid; gap: 4px; line-height: 1.25; }
+.dl-grid button small { font-weight: 400; color: var(--muted); font-size: 0.82rem; }
+.dl-grid button.primary small { color: var(--accent-ink); opacity: 0.85; }
+.muted { color: var(--muted); }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+@media (prefers-reduced-motion: no-preference) { button { transition: border-color .15s, background-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Garden Concept Converter</h1>
+    <p class="tagline">Paste the layout from the Garden Concept Gem, check the drawing, and download files to open in SketchUp.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="in-h">
+      <p class="step">Step 1</p>
+      <h2 id="in-h">Paste the layout</h2>
+      <label for="layout" class="muted" style="display:block;font-size:.9rem;margin-bottom:6px">In the Gem, press the copy button on the layout block, then paste it here.</label>
+      <textarea id="layout" spellcheck="false" autocomplete="off"></textarea>
+      <div class="row">
+        <button id="draw" class="primary" type="button">Draw it</button>
+        <button id="paste" type="button">Paste</button>
+        <button id="example" type="button">Load example</button>
+        <button id="clear" type="button">Clear</button>
+      </div>
+      <div id="status" class="status idle" role="status" aria-live="polite"><p class="status-title">Paste the layout block from the Gem, or load the example.</p></div>
+      <div class="how">
+        <strong>Which file for SketchUp?</strong>
+        <ol>
+          <li><b>SketchUp on a computer:</b> File › Import the <b>3D model</b> (.dae). Paving, lawn and beds arrive as coloured surfaces; walls, planters and pergola as simple shapes.</li>
+          <li><b>Free SketchUp in a browser:</b> import the <b>plan image</b>. Click once to place it, then type the width printed on the image (for example <code>23.2m</code>) so it's to scale, and model over it.</li>
+          <li>The <b>DXF</b> is a 2D base plan for any CAD program (choose Meters when importing).</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="proj-h">
+      <div class="drawing-head">
+        <div>
+          <p class="step">Step 2 · Check the drawing</p>
+          <p class="proj-name" id="project-name">Example layout</p>
+          <p class="proj-meta" id="project-meta"></p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Drawing view">
+          <button type="button" role="tab" data-tab="plan" aria-selected="true">Plan</button>
+          <button type="button" role="tab" data-tab="3d" aria-selected="false">3D view</button>
+        </div>
+      </div>
+      <div id="panel-plan"><div class="canvas-host"><canvas id="plan" aria-label="Coloured concept plan"></canvas></div></div>
+      <div id="panel-3d" hidden>
+        <div id="three" aria-label="3D view - drag to turn, scroll to zoom"></div>
+        <div class="view-row">
+          <span class="label">Views:</span>
+          <button type="button" data-view="front">From the house end</button>
+          <button type="button" data-view="rear">From the far end</button>
+          <button type="button" data-view="top">Top</button>
+          <button type="button" data-dl="view">Save this view (.png)</button>
+        </div>
+        <p class="muted" style="font-size:.88rem;margin:8px 0 0">Drag to turn, scroll or pinch to zoom. Save a view and drop it into the Gem to get a loose concept render of it.</p>
+      </div>
+
+      <div class="downloads">
+        <p class="step" style="margin:0">Step 3 · Download for SketchUp</p>
+        <div class="dl-grid">
+          <button type="button" class="primary" data-dl="zip">All three files<small>One .zip: 3D model, base plan and plan image</small></button>
+          <button type="button" data-dl="dae">3D model (.dae)<small>SketchUp on a computer</small></button>
+          <button type="button" data-dl="png">Plan image (.png)<small>Any SketchUp, incl. free web version</small></button>
+          <button type="button" data-dl="dxf">Base plan (.dxf)<small>2D lines on layers, in metres</small></button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<div id="toast" role="status" hidden></div>
+
+<script type="application/json" id="example-layout">
+/*EXAMPLE*/
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script id="gc-core">
+/*CORE*/
+</script>
+<script id="gc-plan">
+/*PLAN*/
+</script>
+<script id="gc-app">
+/*APP*/
+</script>

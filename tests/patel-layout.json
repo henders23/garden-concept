@@ -1,0 +1,57 @@
+{
+  "project": {"name": "Patel - concept v1", "client": "The Patels, 12 Fern Road", "north": 45},
+  "site": {"boundary": [[0, 0], [11, 0], [11, 16], [0, 16]], "ground": "lawn"},
+  "zones": [
+    {"type": "sandstone", "shape": {"rect": [0, 0, 11, 3.5]}, "label": "SANDSTONE\nTERRACE", "label_at": [6.6, 2.6]},
+    {"type": "planting", "shape": {"rect": [0, 3.5, 1.2, 11.3]}, "label": ""},
+    {"type": "planting", "shape": {"rect": [0, 14.8, 8.0, 1.2]}, "label": "PLANTING", "label_at": [4.6, 15.4]},
+    {"type": "planting", "shape": {"rect": [9.8, 3.5, 1.2, 9.1]}, "label": ""},
+    {"type": "planting", "shape": {"blob": [2.2, 5.3, 1.7, 1.3]}, "label": ""},
+    {"type": "planting", "shape": {"blob": [2.3, 13.6, 1.9, 1.3]}, "label": ""},
+    {"type": "water", "shape": {"ellipse": [2.5, 4.5, 1.2, 0.9]}, "label": "POND", "label_at": [2.7, 4.4]},
+    {"type": "gravel", "shape": {"rect": [7.4, 12.6, 3.6, 0.9]}, "label": ""},
+    {"type": "gravel", "shape": {"path": [[7.9, 3.5], [8.1, 4.0], [8.3, 4.8], [8.5, 5.5], [8.6, 6.2], [8.7, 6.8], [8.6, 7.5], [8.4, 8.2], [8.0, 8.8], [7.8, 9.5], [7.7, 10.1], [7.8, 10.7], [7.9, 11.3], [8.1, 11.9], [8.5, 12.4], [8.7, 12.8]], "width": 1.1}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [7.8, 3.7, 0.6, 0.4], "rotate": 158}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [8.0, 4.4, 0.6, 0.4], "rotate": 166}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [8.2, 5.2, 0.6, 0.4], "rotate": 164}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [8.3, 5.9, 0.6, 0.4], "rotate": 172}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [8.4, 6.6, 0.6, 0.4], "rotate": 188}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [8.3, 7.4, 0.6, 0.4], "rotate": 196}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [8.0, 8.1, 0.6, 0.4], "rotate": 214}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [7.7, 8.7, 0.6, 0.4], "rotate": 196}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [7.5, 9.5, 0.6, 0.4], "rotate": 189}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [7.4, 10.2, 0.6, 0.4], "rotate": 171}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [7.6, 10.9, 0.6, 0.4], "rotate": 171}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [7.8, 11.7, 0.6, 0.4], "rotate": 162}, "label": ""},
+    {"type": "sandstone", "shape": {"rect": [8.2, 12.3, 0.6, 0.4], "rotate": 153}, "label": ""}
+  ],
+  "lines": [
+    {"type": "fence", "points": [[0, 0], [0, 16], [11, 16], [11, 0]]},
+    {"type": "screen", "points": [[9.4, 0.4], [9.4, 2.6]], "height": 1.5}
+  ],
+  "buildings": [
+    {"type": "house", "shape": {"rect": [0, -8, 11, 8]}, "storeys": 2, "roof": "gable", "label": "HOUSE"}
+  ],
+  "structures": [
+    {"type": "garden_room", "shape": {"rect": [8.0, 13.5, 3.0, 2.5]}, "label": "GARDEN\nROOM"}
+  ],
+  "planting": [
+    {"type": "tree", "at": [2.4, 13.4], "size": "large", "form": "round"},
+    {"type": "tree", "at": [3.3, 6.1], "size": "small", "form": "multistem"},
+    {"type": "tree", "at": [10.4, 10.4], "size": "small", "form": "multistem"}
+  ],
+  "features": [
+    {"type": "dining_table", "at": [3.2, 1.8]},
+    {"type": "water_feature", "at": [1.7, 5.0], "label": "WATER FEATURE", "label_at": [-2.4, 6.4]},
+    {"type": "boulder", "at": [3.7, 5.1], "size": 0.7},
+    {"type": "boulder", "at": [1.5, 3.9], "size": 0.6},
+    {"type": "person", "at": [7.2, 1.2]},
+    {"type": "person", "at": [7.6, 0.9]}
+  ],
+  "labels": [
+    {"text": "LAWN", "at": [4.8, 9.6]},
+    {"text": "STEPPING STONES\nIN GRAVEL", "at": [14.2, 7.8], "pointer": [8.4, 7.6]},
+    {"text": "SLATTED SCREEN\n& BIN STORE", "at": [14.2, 1.6], "pointer": [9.5, 1.6]},
+    {"text": "KITCHEN DOORS", "at": [5.5, -1.8], "pointer": [5.5, 0.1]}
+  ]
+}

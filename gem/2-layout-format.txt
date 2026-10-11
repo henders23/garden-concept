@@ -1,0 +1,125 @@
+# Layout block format (for the Garden Concept Converter)
+
+The layout block is one JSON object. The Converter turns it into a coloured concept plan,
+a 3D model for SketchUp, a DXF base plan and a to-scale plan image.
+
+## Coordinates
+- All measurements in **metres**.
+- Origin `[0, 0]` is the **bottom-left corner of the plot as drawn**. `x` runs to the right, `y` runs up the page.
+- Draw the plan the way the designer sketched it (usually the house towards the bottom). Set `project.north` to show where north is.
+- Points are `[x, y]`. Keep one decimal place (e.g. `[4.5, 12.0]`).
+
+## Shapes
+Use whichever is simplest:
+
+| shape | meaning |
+|---|---|
+| `{"rect": [x, y, width, depth]}` | rectangle from its bottom-left corner. To turn it, add `"rotate": degrees` (anticlockwise, about its centre) - either inside the shape or on the item, both work |
+| `{"circle": [cx, cy, radius]}` | circle |
+| `{"ellipse": [cx, cy, rx, ry]}` | oval |
+| `{"blob": [cx, cy, rx, ry]}` | soft organic island (beds, kidney shapes) |
+| `{"arc": [cx, cy, inner_radius, outer_radius, from_deg, to_deg]}` | curved band / ring segment. Angles anticlockwise from the +x direction (0 = right, 90 = up) |
+| `{"path": [[x, y], [x, y], ...], "width": w, "curve": true}` | a strip of width `w` along a line (paths, drives). With `"curve": true` it becomes a smooth curve through the points, so 4-6 points are enough for a gentle S-bend |
+| `{"points": [[x, y], [x, y], ...]}` | any outline; list the corners in order around the shape, don't repeat the first point |
+
+## Top level
+```json
+{
+  "project": {"name": "Gibbs - concept v1", "client": "Mr & Mrs Gibbs", "ref": "GI/331", "north": 0},
+  "site": {"boundary": [[0, 0], [18, 0], [18, 30], [0, 30]], "ground": "lawn"},
+  "zones": [],
+  "lines": [],
+  "buildings": [],
+  "structures": [],
+  "planting": [],
+  "features": [],
+  "labels": []
+}
+```
+- `north`: degrees clockwise from straight up the page to north (0 = north is up, 90 = north points right).
+- `site.boundary`: the plot outline (points, or a shape object). `ground`: what fills any space not covered by a zone (usually `lawn`).
+  Optional `"label": "LAWN"` and `"label_at": [x, y]` to label that ground.
+- Rear-garden-only jobs: make the boundary just the garden, and place the house outside it (e.g. below it, with negative `y`). That is fine and expected.
+- `project`: leave out `ref` or `client` if you don't know them; never invent them. `client` may include the address.
+
+## zones - surfaces, drawn in list order (later zones sit on top)
+```json
+{"type": "gravel", "shape": {"circle": [6.5, 17.4, 3.4]}, "label": "GRAVEL\nCOURTYARD", "label_at": [6.5, 18.9]}
+```
+Types: `lawn`, `planting`, `paving` (pale stone/porcelain), `sandstone` (warm paving), `resin_bound`, `gravel`, `hoggin`,
+`decking`, `water` (pond), `pool`, `raised_bed` (0.45 m high, soil top), `veg_bed` (0.3 m timber bed), `bark` (play area), `meadow`.
+- `label`: short capitals; `"\n"` for a second line; `""` for no label. If left out, a default label is used (LAWN, PLANTING...).
+  Use the designer's material codes where he uses them (e.g. `"RBG1"` for resin bound gravel).
+- `label_at`: optional `[x, y]` to move the label.
+- `planting` zones fill themselves with loose shrub massing automatically. Add `"fill": "sparse"` or `"dense"`, or `"fill": false` for an empty bed.
+- Order matters: put large base areas first, then things that sit on them (a bed in a lawn, a pond in gravel, a pocket in a courtyard).
+
+## lines - runs along a line of points
+```json
+{"type": "hedge", "points": [[0, 20], [8, 20]], "height": 1.5}
+```
+Types (default height): `wall` (1.0), `retaining_wall` (0.6), `fence` (1.8), `screen` (slatted timber, 1.8), `hedge` (1.5),
+`trellis` (1.8), `edging` (low metal edging), `stepping_stones`.
+Optional `height`, `thickness`, `"curve": true` (smooth curve through the points; on by default for stepping stones and hedges with 3+ points).
+
+Stepping stones are laid automatically along the line:
+```json
+{"type": "stepping_stones", "points": [[8, 3.5], [8.6, 6.5], [7.7, 10], [8.5, 12.6]], "size": 0.5, "spacing": 0.65}
+```
+`size` = stone width (default 0.5 m), `spacing` = centre to centre (default 0.65 m). Lay a `gravel` zone (or a gravel `path` zone) underneath if they sit in gravel.
+
+## buildings - the house and existing buildings
+```json
+{"type": "house", "shape": {"rect": [3, 0, 8, 8]}, "storeys": 2, "roof": "hip"}
+```
+Types: `house`, `garage`, `extension`, `outbuilding`. `roof`: `hip`, `gable` or `flat` (hip and gable need a rect). `storeys` (default 2 for a house, 1 otherwise) or `height` in metres. `ridge`: `"short"` turns a gable ridge to run along the short side. Optional `label`.
+
+## structures - new garden structures
+```json
+{"type": "pergola", "shape": {"arc": [6.5, 17.4, 2.95, 4.05, -15, 195]}}
+{"type": "pergola", "shape": {"rect": [2, 10, 4, 3]}}
+{"type": "greenhouse", "shape": {"rect": [12.4, 17, 4.2, 3]}, "label": "GREENHOUSE"}
+```
+Types: `pergola` (rect, or arc for a curved pergola - inner and outer radius are the two rows of posts), `carport`, `shed`,
+`summerhouse`, `greenhouse`, `garden_room` (all rect, optional `rotate`), `gazebo` (circle). Optional `height`, `label`, `label_at`.
+
+## planting - individual trees and specimen shrubs
+```json
+{"type": "tree", "at": [10, 24], "size": "large", "form": "round"}
+{"type": "shrub", "at": [4, 6], "size": "medium"}
+```
+- tree `size`: `small` (~4.5 m tall, 3 m spread), `medium` (~6.5 m, 4 m), `large` (~9 m, 6 m). Optional `height`, `spread`.
+- tree `form`: `round`, `airy` (light canopy, e.g. birch-like), `upright`, `multistem`, `conifer`.
+- shrub `size`: `small`, `medium`, `large`.
+- No species names. Massed planting comes from `planting` zones.
+
+## features
+```json
+{"type": "firebowl", "at": [6.5, 17.4], "label": "FIREBOWL", "label_at": [10.6, 15.6]}
+```
+Types (what `size` means, default): `firebowl` (diameter, 0.9), `dining_table` (length, 2.0 - runs left-right, seats both long sides), `bench` (length, 1.8),
+`pot` (diameter, 0.6), `water_feature` (diameter, 0.9), `sculpture` (width, 0.5), `boulder` (width, 1.0), `car` (length, 4.4 - runs left-right),
+`person`, `lounger` (length, 2.0), `hot_tub` (width, 2.2), `bin_store` (length, 2.0).
+Optional `rotate` (degrees anticlockwise; e.g. 90 turns a car or table to run up the page), `size`, `label`, `label_at` (a label gets a pointer to the feature).
+Cars and a couple of people give the client a sense of scale.
+
+## labels - extra annotations
+```json
+{"text": "SLATTED SCREEN\n& HEDGE PLANTERS", "at": [14.8, 9.9], "pointer": [11.1, 12.8]}
+{"text": "RAISED VEG BEDS", "at": [14.7, 15.9]}
+{"text": "EXTENDED ROOF", "at": [8, 5], "style": "box"}
+```
+Which label to use:
+- Zones, buildings, structures and features: use their own `label` (and `label_at`).
+- Lines (screens, hedges, walls, stepping stones) and general notes: use an entry in `labels`, usually with a `pointer`.
+
+- With `pointer`: a grey callout box with a pointer, like the designer's own plans.
+- Without: plain bold capitals. `"style": "box"` gives a box without a pointer.
+- Put callouts just outside busy areas so they don't cover the design.
+
+## Checklist before sending a layout block
+1. One complete JSON object, no comments, no trailing commas.
+2. Every zone sits inside the boundary; base areas come before the things on top of them.
+3. Paths and gravel actually connect the spaces they serve.
+4. The house is in the right place relative to the garden.
+5. Labels are short capitals and don't sit on top of each other.
