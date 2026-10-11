@@ -1,8 +1,10 @@
 # Your concept design helper: quick guide
 
 You have two things:
-- the **Garden Concept Assistant** in your Gemini app (shared with you; find it under *Gems*);
-- the **Garden Concept Converter**, a web page you've bookmarked.
+- the **Garden Concept Assistant** in your Gemini app (shared with you; find it under *Gems*):
+  https://gemini.google.com/gem/aad5a90f8af0
+- the **Garden Concept Converter**, a web page to bookmark:
+  https://henders23.github.io/garden-concept/
 
 ## 1. Tell the Gem about the job
 Open the Gem and give it what you have, in any order:
