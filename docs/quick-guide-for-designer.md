@@ -2,6 +2,9 @@
 
 You have the **Garden Concept Assistant** in your Gemini app (shared with you; find it under *Gems*). Everything happens there.
 
+- **The Gem:** https://gemini.google.com/gem/aad5a90f8af0
+- **The Converter** (backup, if a drawing doesn't show; worth bookmarking): https://henders23.github.io/garden-concept/
+
 ## 1. Tell the Gem about the job
 Open the Gem and give it what you have, in any order:
 - site photos and a photo of your sketch (dimensions written on it help a lot);
