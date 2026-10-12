@@ -1,11 +1,35 @@
-/* Garden Concept Converter - page behaviour: paste, check, preview (plan + 3D), download. */
-(function () {
+/* Garden Concept Converter - page behaviour: paste, check, preview (plan + 3D), download.
+   GC.startApp(opts) runs it. opts.layoutText: a layout handed in by the page (Gemini Canvas);
+   opts.converterUrl: address of the full Converter, for the "open in full Converter" link. */
+(function (root) {
   "use strict";
+  const GC = root.GC;
+
+  // ---------- design <-> link encoding (deflate + base64url; plain base64url where compression is missing)
+  function b64url(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function unb64url(t) { t = t.replace(/-/g, "+").replace(/_/g, "/"); while (t.length % 4) t += "="; const s = atob(t), b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; }
+  async function pipe(bytes, stream) { const out = new Response(new Blob([bytes]).stream().pipeThrough(stream)); return new Uint8Array(await out.arrayBuffer()); }
+  GC.encodeLayout = async function (text) {
+    let t = text; try { t = JSON.stringify(JSON.parse(text)); } catch (e) { /* keep as typed */ }
+    const raw = new TextEncoder().encode(t);
+    if (typeof CompressionStream === "function") { try { return "z" + b64url(await pipe(raw, new CompressionStream("deflate-raw"))); } catch (e) { /* fall through */ } }
+    return "b" + b64url(raw);
+  };
+  GC.decodeLayout = async function (code) {
+    const kind = code[0], bytes = unb64url(code.slice(1));
+    if (kind === "z") return new TextDecoder().decode(await pipe(bytes, new DecompressionStream("deflate-raw")));
+    return new TextDecoder().decode(bytes);
+  };
+
+  GC.startApp = function (opts) {
+  opts = opts || {};
   const $ = (id) => document.getElementById(id);
   const ta = $("layout"), statusEl = $("status"), planCanvas = $("plan"), threeHost = $("three");
   let current = null; // {M, objs}
   let downloadsCap = null;
   const inViewer = !!(window.claude && window.claude.use);
+  const embedded = !!opts.layoutText;
+  const converterUrl = opts.converterUrl || null;
 
   // ---------- status
   function setStatus(kind, title, items) {
@@ -40,6 +64,15 @@
     drawPreview();
     if (viewer) viewer.load(objs, M);
     setDownloads(true);
+    updateFullLink(text);
+  }
+
+  // link to the full Converter carrying this design (used from Gemini Canvas)
+  let linkSeq = 0;
+  async function updateFullLink(text) {
+    const a = $("open-full"); if (!a || !converterUrl) return;
+    const seq = ++linkSeq, code = await GC.encodeLayout(text);
+    if (seq === linkSeq) a.href = converterUrl.replace(/#.*$/, "") + "#d=" + code;
   }
 
   function drawPreview() {
@@ -185,18 +218,64 @@
   $("example").addEventListener("click", () => { ta.value = document.getElementById("example-layout").textContent.trim(); run(); });
   $("clear").addEventListener("click", () => { ta.value = ""; current = null; run(); ta.focus(); });
   $("paste").addEventListener("click", async () => {
+    if (await tryClipboard(true)) return;
     try { const t = await navigator.clipboard.readText(); if (t) { ta.value = t; run(); return; } } catch (e) { /* not allowed here */ }
     ta.focus(); toast("Press Ctrl+V (or ⌘V) to paste");
   });
 
+  // ---------- pick up a layout the designer has just copied (only once he has allowed clipboard access)
+  const looksLikeLayout = (t) => !!t && t.length < 500000 && /"site"\s*:/.test(t) && /"boundary"/.test(t);
+  let lastClip = null;
+  async function tryClipboard(fromClick) {
+    if (embedded || inViewer || !navigator.clipboard || !navigator.clipboard.readText) return false;
+    try {
+      if (!fromClick) {
+        if (!navigator.permissions) return false;
+        const st = await navigator.permissions.query({ name: "clipboard-read" });
+        if (st.state !== "granted") return false;
+      }
+      const t = await navigator.clipboard.readText();
+      if (!looksLikeLayout(t)) return false;
+      if (!fromClick && t === lastClip) return true;
+      lastClip = t;
+      if (t.trim() !== ta.value.trim()) { ta.value = t; run(); if (!fromClick) toast("Loaded the layout you copied from the Gem"); }
+      return true;
+    } catch (e) { return false; }
+  }
+  window.addEventListener("focus", () => tryClipboard(false));
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tryClipboard(false); });
+
+  async function fromHash() {
+    const m = /^#d=([A-Za-z0-9_-]+)/.exec(location.hash || "");
+    if (!m) return false;
+    try { ta.value = await GC.decodeLayout(m[1]); run(); toast("Opened the design from the Gem"); return true; }
+    catch (e) { setStatus("bad", "This link didn't come through complete. Go back to the Gem and open the drawing again, or copy and paste the layout block."); return true; }
+  }
+  window.addEventListener("hashchange", fromHash);
+
   // ---------- start
-  let saved = null; try { saved = localStorage.getItem("gc-layout"); } catch (e) { /* ignore */ }
-  ta.value = saved && saved.trim() ? saved : document.getElementById("example-layout").textContent.trim();
-  run();
+  if (embedded) {
+    document.documentElement.classList.add("embedded");
+    $("embed-bar").hidden = !converterUrl;
+    $("tagline").textContent = "Check the drawing, turn it round in 3D, and download the files for SketchUp.";
+    ta.value = opts.layoutText.trim();
+    run();
+  } else {
+    let saved = null; try { saved = localStorage.getItem("gc-layout"); } catch (e) { /* ignore */ }
+    ta.value = saved && saved.trim() ? saved : document.getElementById("example-layout").textContent.trim();
+    run();
+    fromHash().then((used) => { if (!used) tryClipboard(false); });
+  }
+  const copyBtn = $("copy-layout");
+  if (copyBtn) copyBtn.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(ta.value); toast("Layout copied"); }
+    catch (e) { ta.hidden = false; ta.select(); toast("Press Ctrl+C (or ⌘C) to copy"); }
+  });
   if (inViewer) {
     // inside a Claude artifact: files go through the viewer's save prompt (zip and png only)
     document.querySelectorAll('[data-dl="dae"],[data-dl="dxf"]').forEach((b) => (b.hidden = true));
     window.claude.use("downloads").then((d) => { downloadsCap = d; if (!d) document.querySelectorAll("[data-dl]").forEach((b) => (b.hidden = true)); });
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawPreview);
-})();
+  };
+})(typeof window !== "undefined" ? window : globalThis);

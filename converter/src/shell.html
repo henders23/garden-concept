@@ -1,7 +1,3 @@
-<title>Garden Concept Converter</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap">
 <style>
 /* Layout: a working bench - paste on the left, the drawing large on the right, downloads under the drawing. */
 :root {
@@ -73,17 +69,32 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .dl-grid button.primary small { color: var(--accent-ink); opacity: 0.85; }
 .muted { color: var(--muted); }
 #toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+.embed-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-bottom: 20px; }
+.embed-text { margin: 0; max-width: 70ch; }
+a.btn { display: inline-block; font: 600 0.95rem/1 var(--body); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); text-decoration: none; }
+a.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+a.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.embedded .grid { grid-template-columns: minmax(0, 1fr); }
+.embedded #input-card { display: none; }
 @media (prefers-reduced-motion: no-preference) { button { transition: border-color .15s, background-color .15s; } }
 </style>
 
 <div class="wrap">
   <header class="top">
     <h1>Garden Concept Converter</h1>
-    <p class="tagline">Paste the layout from the Garden Concept Gem, check the drawing, and download files to open in SketchUp.</p>
+    <p class="tagline" id="tagline">Paste the layout from the Garden Concept Gem, check the drawing, and download files to open in SketchUp.</p>
   </header>
 
-  <div class="grid">
-    <section class="card" aria-labelledby="in-h">
+  <div class="embed-bar card" id="embed-bar" hidden>
+    <p class="embed-text"><b>Drawn from the Gem.</b> If the download buttons don't start a download here, open the full Converter: it opens with this design already loaded.</p>
+    <div class="row" style="margin-top:0">
+      <a class="btn primary" id="open-full" href="#" target="_blank" rel="noopener">Open in the full Converter</a>
+      <button type="button" id="copy-layout">Copy layout</button>
+    </div>
+  </div>
+
+  <div class="grid" id="main-grid">
+    <section class="card" aria-labelledby="in-h" id="input-card">
       <p class="step">Step 1</p>
       <h2 id="in-h">Paste the layout</h2>
       <label for="layout" class="muted" style="display:block;font-size:.9rem;margin-bottom:6px">In the Gem, press the copy button on the layout block, then paste it here.</label>
@@ -130,7 +141,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
         <p class="muted" style="font-size:.88rem;margin:8px 0 0">Drag to turn, scroll or pinch to zoom. Save a view and drop it into the Gem to get a loose concept render of it.</p>
       </div>
 
-      <div class="downloads">
+      <div class="downloads" id="downloads">
         <p class="step" style="margin:0">Step 3 · Download for SketchUp</p>
         <div class="dl-grid">
           <button type="button" class="primary" data-dl="zip">All three files<small>One .zip: 3D model, base plan and plan image</small></button>
@@ -143,19 +154,3 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   </div>
 </div>
 <div id="toast" role="status" hidden></div>
-
-<script type="application/json" id="example-layout">
-/*EXAMPLE*/
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script id="gc-core">
-/*CORE*/
-</script>
-<script id="gc-plan">
-/*PLAN*/
-</script>
-<script id="gc-app">
-/*APP*/
-</script>

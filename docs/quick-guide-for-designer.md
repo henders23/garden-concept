@@ -1,10 +1,6 @@
 # Your concept design helper: quick guide
 
-You have two things:
-- the **Garden Concept Assistant** in your Gemini app (shared with you; find it under *Gems*):
-  https://gemini.google.com/gem/aad5a90f8af0
-- the **Garden Concept Converter**, a web page to bookmark:
-  https://henders23.github.io/garden-concept/
+You have the **Garden Concept Assistant** in your Gemini app (shared with you; find it under *Gems*). Everything happens there.
 
 ## 1. Tell the Gem about the job
 Open the Gem and give it what you have, in any order:
@@ -16,18 +12,19 @@ It may ask you a few quick questions, such as rough sizes or where north is. If 
 
 ## 2. What you get back
 - **A concept summary**: the main ideas in a few lines.
-- **A layout block**: a box of text with a **copy** button in its top-right corner.
+- **The drawing**, opened beside the chat: a coloured plan, a **3D view** you can spin round, and download buttons.
 - Offers to make **concept images** or draft the **Context and Brief** text for your proposal.
 
-Ask for changes in plain English, such as *"move the pergola to the back corner"* or *"make the terrace deeper"*. It sends a fresh layout block each time.
+Ask for changes in plain English, such as *"move the pergola to the back corner"* or *"make the terrace deeper"*. The drawing updates each time.
 
-## 3. Make the drawing
-1. Press **copy** on the layout block.
-2. Open the Converter, click into the big box, and paste (Ctrl+V, or ⌘V on a Mac).
-3. Check the **Plan**, and click **3D view** to spin it round.
-4. Click **All three files** to download them for SketchUp.
+## 3. Get the files for SketchUp
+Click **All three files** under the drawing.
 
-If the Converter shows a note in orange or red, copy the note into the Gem and say *"please fix this"*.
+If nothing downloads, click **Open in the full Converter** at the top of the drawing. It opens the same design in a new tab, where the download buttons work.
+
+If the drawing doesn't appear at all, press **copy** on the layout block in the Gem's reply and open the Converter link just below it. The design appears by itself (the first time, click **Paste** and allow it).
+
+If the drawing shows a note in orange or red, copy the note into the Gem and say *"please fix this"*.
 
 ## 4. Open it in SketchUp
 - **SketchUp on your computer:** File › Import › choose the **.dae** file (the 3D model). Everything arrives as coloured surfaces and simple shapes you can edit.
@@ -35,7 +32,7 @@ If the Converter shows a note in orange or red, copy the note into the Gem and s
 
 ## 5. Concept images
 - Ask the Gem: *"Make a concept image looking from the terrace towards the summerhouse."*
-- Or save a view: in the Converter's 3D view (or a SketchUp screenshot), save the picture, drop it into the Gem and say *"render this as a loose concept view"*.
+- Or save a view: in the drawing's 3D view (or a SketchUp screenshot), save the picture, drop it into the Gem and say *"render this as a loose concept view"*.
 
 Images are deliberately loose and sketchy, so clients see the idea without fixing on exact plants or materials.
 
